@@ -48,33 +48,8 @@ export default class App {
       this.mesh.position.y = 6;
       this.scene.add( this.mesh );
 
-      function createTrees() {
-        for (var i = 0; i < 5; i++) {
-          let trunkRadius = 1,
-              trunkHeight = getRandom(1, 4),
-              trunkRadiusSegment = getRandom(4, 8),
-              x = getRandom(0, 350),
-              z = getRandom(0, 250);
-
-          let trunkTree = new THREE.CylinderGeometry (trunkRadius, trunkRadius, trunkHeight, trunkRadiusSegment);
-          let trunkTreeMaterial = new THREE.MeshPhongMaterial(
-            {
-              color: 0x55503d,
-              emissive: 0x393524,
-              specular: 0xffffff
-            }
-          );
-          console.log(this);
-          // this.mesh = new THREE.Mesh( trunkRadius, trunkTreeMaterial );
-          // console.log(trunkTree);
-          // // trunkTree.position.set(15, 0, 15);
-        }
-      };
-      createTrees();
-
-      function getRandom(min, max) {
-        return Math.floor(Math.random() * (max - min) + min);
-      }
+      // function
+      this.createTrees();
 
       /**
         Plain
@@ -124,6 +99,31 @@ export default class App {
         this.renderer.animate( this.render.bind(this) );
     }
 
+    createTrees() {
+
+      for (var i = 0; i < 5; i++) {
+        let trunkRadius = 1,
+            trunkHeight = this.getRandom(1, 4),
+            trunkRadiusSegment = this.getRandom(4, 8),
+            x = this.getRandom(0, 350),
+            z = this.getRandom(0, 250);
+
+        let trunkTree = new THREE.CylinderGeometry (trunkRadius, trunkRadius, trunkHeight, trunkRadiusSegment);
+        let trunkTreeMaterial = new THREE.MeshPhongMaterial(
+          {
+            color: 0x55503d,
+            emissive: 0x393524,
+            specular: 0xffffff
+          }
+        );
+        console.log(this);
+        // this.mesh = new THREE.Mesh( trunkRadius, trunkTreeMaterial );
+        // console.log(trunkTree);
+        // // trunkTree.position.set(15, 0, 15);
+      }
+    }
+
+
     render() {
         //
         // this.mesh.rotation.x += 0.01;
@@ -137,5 +137,9 @@ export default class App {
     	this.camera.aspect = window.innerWidth / window.innerHeight;
     	this.camera.updateProjectionMatrix();
     	this.renderer.setSize( window.innerWidth, window.innerHeight );
+    }
+
+    getRandom(min, max) {
+      return Math.floor(Math.random() * (max - min) + min);
     }
 }
