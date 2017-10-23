@@ -11,12 +11,14 @@ export default class Test {
     // this.hello();
     // console.log(this);
 
-    window.setTimeout(this.hello.bind(this), 500);
+    window.setTimeout(this.timeout.bind(this), 500);
   }
-
+  timeout() {
+    console.log("Hola");
+  }
   hello() {
-    console.log(this);
-    // console.log(this.test);
+    // console.log(this);
+    console.log(this.test);
   }
 
 }

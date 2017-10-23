@@ -19,38 +19,8 @@ export default class App {
 
     	this.scene = new THREE.Scene();
 
-      /**
-        Tree
-        */
-      let trunk = new THREE.CylinderGeometry( 1, 1, 2, 8 );
-	    let trunkMaterial = new THREE.MeshPhongMaterial(
-        {
-          color: 0x55503d,
-          emissive: 0x393524,
-          specular: 0xffffff
-        }
-      );
-
-    	this.mesh = new THREE.Mesh( trunk, trunkMaterial );
-      this.mesh.position.y = 1;
-    	this.scene.add( this.mesh );
-
-      let leave = new THREE.ConeGeometry(4, 8, 6);
-      let leaveMaterial = new THREE.MeshPhongMaterial(
-        {
-          color: 0x2c714a,
-          emissive: 0x1a5e38,
-          specular: 0x75b490,
-          shininess: 10
-        }
-      );
-      this.mesh = new THREE.Mesh( leave, leaveMaterial );
-      this.mesh.position.y = 6;
-      this.scene.add( this.mesh );
-
-      // function
-      this.createTrees();
-
+      this.createTrees(); // draw Trees
+      
       /**
         Plain
         */
@@ -101,14 +71,20 @@ export default class App {
 
     createTrees() {
 
-      for (var i = 0; i < 5; i++) {
-        let trunkRadius = 1,
-            trunkHeight = this.getRandom(1, 4),
-            trunkRadiusSegment = this.getRandom(4, 8),
-            x = this.getRandom(0, 350),
-            z = this.getRandom(0, 250);
+      for (var i = 0; i < 80; i++) {
+        let trunkRadius = .75,
+            trunkHeight = this.getRandom(2, 4),
+            trunkRadiusSegments = this.getRandom(5, 8),
+            trunkTreeX = this.getRandom(-150, 150), // width : 350
+            trunkTreeZ = this.getRandom(-100, 100), // height : 250
+            coneRadius = this.getRandom(2, 5),
+            coneHeight = this.getRandom(8, 15),
+            coneRadialSegments = this.getRandom(8, 20);
 
-        let trunkTree = new THREE.CylinderGeometry (trunkRadius, trunkRadius, trunkHeight, trunkRadiusSegment);
+        /**
+          Trunk
+          */
+        let trunkTree = new THREE.CylinderGeometry (trunkRadius, trunkRadius, trunkHeight, trunkRadiusSegments);
         let trunkTreeMaterial = new THREE.MeshPhongMaterial(
           {
             color: 0x55503d,
@@ -116,16 +92,34 @@ export default class App {
             specular: 0xffffff
           }
         );
-        console.log(this);
-        // this.mesh = new THREE.Mesh( trunkRadius, trunkTreeMaterial );
-        // console.log(trunkTree);
-        // // trunkTree.position.set(15, 0, 15);
+
+        /**
+          Cone
+          */
+        let coneTree = new THREE.ConeGeometry(coneRadius, coneHeight, coneRadialSegments);
+        let coneTreeMaterial = new THREE.MeshPhongMaterial(
+          {
+            color: 0x2c714a,
+            emissive: 0x1a5e38,
+            specular: 0x75b490,
+            shininess: 10
+          }
+        );
+
+        // console.log(this);
+        this.trunkTreeMesh = new THREE.Mesh( trunkTree, trunkTreeMaterial );
+        // console.log(this.trunkTreeMesh);
+        this.coneTreeMesh = new THREE.Mesh( coneTree, coneTreeMaterial );
+
+        this.trunkTreeMesh.position.set(trunkTreeX, trunkHeight / 2, trunkTreeZ);
+        this.coneTreeMesh.position.set(trunkTreeX, trunkHeight + coneHeight / 2, trunkTreeZ);
+
+        this.scene.add( this.trunkTreeMesh, this.coneTreeMesh );
       }
     }
 
-
     render() {
-        //
+
         // this.mesh.rotation.x += 0.01;
         // this.mesh.rotation.y += 0.02;
 
