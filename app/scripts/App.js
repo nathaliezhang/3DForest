@@ -25,7 +25,11 @@ export default class App {
       /**
         Plain
         */
-      let plain = new THREE.PlaneGeometry(350, 350, 100, 100);
+
+      let planeWidth = 350,
+          planeHeight = 350;
+
+      let plain = new THREE.PlaneGeometry(planeWidth, planeHeight, 100, 100);
       // console.log(plain.vertices);
       let plainTextureLoader = new THREE.TextureLoader();
       let plainTexture = plainTextureLoader.load(PlainTexture);
@@ -50,7 +54,7 @@ export default class App {
 
       let plainCoordinates = this.meshPlain;
       // console.log( plainCoordinates.length);
-      console.log( plainCoordinates);
+      // console.log( plainCoordinates);
 
       this.createTrees(plainCoordinates); // draw Trees
       /**
@@ -89,18 +93,37 @@ export default class App {
 
     createTrees(plainCoordinate) {
 
-
-
       // Comparer x et z et affecter le y
       // console.log(plainCoordinate);
 
-      // Créer un canvas
-      let canvas = document.createElement('canvas');
-      // canvas.style.position = 'absolute';
-      // document.body.addChild(canvas);
-      // Charger l'image
-      // Récupérer les valeurs des pixels
-      // Convertir les position du canvas vers le Plane
+      // Create a canvas
+      let canvas = document.createElement('canvas'),
+          ctx = canvas.getContext('2d');
+
+      // Show the canvas
+      canvas.width = 256;
+      canvas.height = 256;
+      canvas.style.top = '0';
+      canvas.style.position = 'absolute';
+      document.body.appendChild(canvas);
+
+      // Load the image
+      let texture = new Image();
+      texture.src = PlainTexture; // Retrieve import
+
+      texture.addEventListener('load', function() {
+
+        // console.log("Je suis chargée");
+        ctx.drawImage(this, 0, 0, 256, 256);
+
+        // Retrieve pixels values
+        let textureData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let data = textureData.data;
+        console.log(textureData);
+
+      });
+
+      // Convertir les positions du canvas vers le Plane
       // Placer les arbres selon la valeur de leurs position
 
 
