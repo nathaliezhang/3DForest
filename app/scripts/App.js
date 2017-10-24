@@ -5,6 +5,7 @@
 // TODO : add Stats
 
 import OrbitControls from 'three/examples/js/controls/OrbitControls';
+import PlainTexture from '../textures/texture.jpg';
 
 export default class App {
 
@@ -14,33 +15,51 @@ export default class App {
     	document.body.appendChild( this.container );
 
         this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 250 );
-        this.camera.position.y = 15;
-        this.camera.position.z = 50;
+        this.camera.position.y = 35;
+        this.camera.position.z = 100;
 
     	this.scene = new THREE.Scene();
-
-      this.createTrees(); // draw Trees
 
       /**
         Plain
         */
-      let plain = new THREE.PlaneGeometry(350, 250);
+
+      let planeWidth = 350,
+          planeHeight = 350;
+
+      let plain = new THREE.PlaneGeometry(planeWidth, planeHeight, 100, 100);
       // console.log(plain.vertices);
+      let plainTextureLoader = new THREE.TextureLoader();
+      let plainTexture = plainTextureLoader.load(PlainTexture);
+
+      plainTexture.wrapS = THREE.RepeatWrapping;
+      plainTexture.wrapT = THREE.RepeatWrapping;
+
       let plainMaterial = new THREE.MeshPhongMaterial(
         {
           color: 0x30a280,
-          emissive: 0x002a25
+          emissive: 0x002a25,
+          wireframe: true,
+          map: plainTexture,
+          displacementMap: plainTexture,
+          displacementScale: 20
         }
       );
+
       this.meshPlain = new THREE.Mesh( plain, plainMaterial );
       this.meshPlain.rotation.x = - Math.PI / 2;
       this.scene.add( this.meshPlain );
 
+      let planeCoordinates = this.meshPlain;
+      // console.log( plainCoordinates.length);
+      // console.log( plainCoordinates);
+
+      this.createTrees(planeCoordinates); // draw Trees
       /**
         Fog
         */
       this.scene.background = new THREE.Color( 0xe9f8ff );
-      this.scene.fog = new THREE.FogExp2 (0xe9f8ff, 0.012);
+      // this.scene.fog = new THREE.FogExp2 (0xe9f8ff, 0.008);
 
       /**
         Light
@@ -69,17 +88,69 @@ export default class App {
         this.renderer.animate( this.render.bind(this) );
     }
 
-    createTrees() {
+
+    createTrees(plainCoordinate) {
+
+      // Comparer x et z et affecter le y
+      // console.log(plainCoordinate);
+
+      // Create a canvas
+      let canvas = document.createElement('canvas'),
+          ctx = canvas.getContext('2d');
+
+      // Show the canvas
+      canvas.width = 256;
+      canvas.height = 256;
+      canvas.style.top = '0';
+      canvas.style.position = 'absolute';
+      document.body.appendChild(canvas);
+
+      // Load the image
+      let texture = new Image();
+      texture.src = PlainTexture; // Retrieve import
+
+      texture.addEventListener('load', function() {
+
+        // console.log("Je suis chargée");
+        ctx.drawImage(this, 0, 0, 256, 256);
+
+        // Retrieve pixels values
+        let textureData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let data = textureData.data;
+        console.log(textureData);
+
+      });
+
+      // Convertir les positions du canvas vers le Plane
+      // Placer les arbres selon la valeur de leurs position
+
 
       for (var i = 0; i < 80; i++) {
         let trunkRadius = .75,
             trunkHeight = this.getRandom(2, 4),
             trunkRadiusSegments = this.getRandom(5, 8),
+            coordinate = planeCoordinates[this.getRandom(0, planeCoordinates.length)],
+            // Donner une vertice de la plane
+            // trunkTreeX = coordinate.x,
             trunkTreeX = this.getRandom(-150, 150), // width : 350
+
             trunkTreeZ = this.getRandom(-100, 100), // height : 250
             coneRadius = this.getRandom(2, 5),
             coneHeight = this.getRandom(8, 15),
             coneRadialSegments = this.getRandom(8, 20);
+
+            /**
+              Retrieve Coordinate y
+              */
+            // var arrayCoordinates = plainCoordinate.filter(filterCoordinate);
+            // // console.log(arrayCoordinates);
+            //
+            // function filterCoordinate(coordinate) {
+            //   // console.log(coordinate);
+            //   if ( coordinate.x === trunkTreeX && coordinate.z === trunkTreeZ ) {
+            //     return true;
+            //   }
+            // }
 
         /**
           Trunk
