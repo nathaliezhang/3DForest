@@ -50,11 +50,9 @@ export default class App {
       this.meshPlain.rotation.x = - Math.PI / 2;
       this.scene.add( this.meshPlain );
 
-      let planeCoordinates = this.meshPlain;
-      // console.log( plainCoordinates.length);
-      // console.log( plainCoordinates);
+      this.treesPosition(planeWidth, planeHeight);
+      this.createTrees(); // draw Trees
 
-      this.createTrees(planeCoordinates); // draw Trees
       /**
         Fog
         */
@@ -88,11 +86,7 @@ export default class App {
         this.renderer.animate( this.render.bind(this) );
     }
 
-
-    createTrees(plainCoordinate) {
-
-      // Comparer x et z et affecter le y
-      // console.log(plainCoordinate);
+    treesPosition(planeWidth, planeHeight) {
 
       // Create a canvas
       let canvas = document.createElement('canvas'),
@@ -116,41 +110,74 @@ export default class App {
 
         // Retrieve pixels values
         let textureData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        let data = textureData.data;
-        console.log(textureData);
+        let data = textureData.data; // All values
+        let pixels = [];
+        // console.log(data);
 
+        for (var i = 0, c = data.length; i < c; i+= 4) {
+          pixels.push(
+            {
+              red: data[i],
+              green: data[i+1],
+              blue: data[i+2],
+              alpha: data[i+3]
+            }
+          )
+        }
+        // console.log(pixels);
       });
 
       // Convertir les positions du canvas vers le Plane
+      let positions = [];
+
+      // First loop for coordinate x & second for y
+      for (var i = 0, c = canvas.width; i < c; i++) {
+        for (var j = 0, c = canvas.height; j < c; j++) {
+
+          if (i <= canvas.width / 2) { // i < 128
+            if (j <= canvas.height / 2) { // j < 128
+              positions.push({
+                x: (-planeWidth / 2) + (planeWidth / canvas.width) * i,
+                y: (-planeWidth / 2) + (planeWidth / canvas.width) * j
+              });
+            } else { // j > 128
+              positions.push({
+                x: (-planeWidth / 2) + (planeWidth / canvas.width) * i,
+                y: (j - canvas.width / 2) * (planeWidth / canvas.width)
+              });
+            }
+          } else if (i >= canvas.width / 2) { // i > 128
+            if (j <= canvas.height / 2) { // j < 128
+              positions.push({
+                x: (i - canvas.width / 2) * (planeWidth / canvas.width),
+                y: (-planeWidth / 2) + (planeWidth / canvas.width) * j
+              });
+            } else { // j > 128
+              positions.push({
+                x: (i - canvas.width / 2) * (planeWidth / canvas.width),
+                y: (j - canvas.width / 2) * (planeWidth / canvas.width)
+              });
+            }
+          }
+
+        }
+      }
+      console.log(positions);
       // Placer les arbres selon la valeur de leurs position
 
+    }
+
+    createTrees() {
 
       for (var i = 0; i < 80; i++) {
         let trunkRadius = .75,
             trunkHeight = this.getRandom(2, 4),
             trunkRadiusSegments = this.getRandom(5, 8),
-            coordinate = planeCoordinates[this.getRandom(0, planeCoordinates.length)],
-            // Donner une vertice de la plane
-            // trunkTreeX = coordinate.x,
             trunkTreeX = this.getRandom(-150, 150), // width : 350
-
             trunkTreeZ = this.getRandom(-100, 100), // height : 250
             coneRadius = this.getRandom(2, 5),
             coneHeight = this.getRandom(8, 15),
             coneRadialSegments = this.getRandom(8, 20);
-
-            /**
-              Retrieve Coordinate y
-              */
-            // var arrayCoordinates = plainCoordinate.filter(filterCoordinate);
-            // // console.log(arrayCoordinates);
-            //
-            // function filterCoordinate(coordinate) {
-            //   // console.log(coordinate);
-            //   if ( coordinate.x === trunkTreeX && coordinate.z === trunkTreeZ ) {
-            //     return true;
-            //   }
-            // }
 
         /**
           Trunk
