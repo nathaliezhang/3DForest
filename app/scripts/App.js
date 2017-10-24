@@ -92,9 +92,10 @@ export default class App {
       let canvas = document.createElement('canvas'),
           ctx = canvas.getContext('2d');
 
-      // Show the canvas
       canvas.width = 256;
       canvas.height = 256;
+
+      // Show the canvas
       canvas.style.top = '0';
       canvas.style.position = 'absolute';
       document.body.appendChild(canvas);
@@ -105,7 +106,7 @@ export default class App {
 
       texture.addEventListener('load', function() {
 
-        // console.log("Je suis chargée");
+        // console.log("I'm loaded.");
         ctx.drawImage(this, 0, 0, 256, 256);
 
         // Retrieve pixels values
@@ -117,52 +118,64 @@ export default class App {
         for (var i = 0, c = data.length; i < c; i+= 4) {
           pixels.push(
             {
-              red: data[i],
-              green: data[i+1],
-              blue: data[i+2],
-              alpha: data[i+3]
+              red: data[i]
+              // green: data[i+1],
+              // blue: data[i+2],
+              // alpha: data[i+3]
             }
           )
         }
         // console.log(pixels);
+
+        /** CONVERT CANVAS POSITIONS TO PLANE POSITIONS **/
+
+        // Convert canvas x, y positions to Plane positions
+        let positions = [];
+        // First loop for coordinate x & second for y
+        for (var i = 0, c = canvas.width; i < c; i++) {
+          for (var j = 0, c = canvas.height; j < c; j++) {
+
+            if (i <= canvas.width / 2) { // i < 128
+              if (j <= canvas.height / 2) { // j < 128
+
+                positions.push({
+                  x: (-planeWidth / 2) + (planeWidth / canvas.width) * i,
+                  y: (-planeWidth / 2) + (planeWidth / canvas.width) * j
+                });
+              } else { // j > 128
+                positions.push({
+                  x: (-planeWidth / 2) + (planeWidth / canvas.width) * i,
+                  y: (j - canvas.width / 2) * (planeWidth / canvas.width)
+                });
+              }
+            } else if (i >= canvas.width / 2) { // i > 128
+              if (j <= canvas.height / 2) { // j < 128
+                positions.push({
+                  x: (i - canvas.width / 2) * (planeWidth / canvas.width),
+                  y: (-planeWidth / 2) + (planeWidth / canvas.width) * j
+                });
+              } else { // j > 128
+                positions.push({
+                  x: (i - canvas.width / 2) * (planeWidth / canvas.width),
+                  y: (j - canvas.width / 2) * (planeWidth / canvas.width)
+                });
+              }
+            }
+
+          }
+        }
+        // console.log(positions);
+
+        // Convert gray levels to z position and add to position
+        for (var i = 0, c = positions.length; i < c; i++) {
+          positions[i].z  = pixels[i].red * (planeWidth / canvas.width);
+        }
+        // console.log(positions);
+
       });
 
-      // Convertir les positions du canvas vers le Plane
-      let positions = [];
 
-      // First loop for coordinate x & second for y
-      for (var i = 0, c = canvas.width; i < c; i++) {
-        for (var j = 0, c = canvas.height; j < c; j++) {
 
-          if (i <= canvas.width / 2) { // i < 128
-            if (j <= canvas.height / 2) { // j < 128
-              positions.push({
-                x: (-planeWidth / 2) + (planeWidth / canvas.width) * i,
-                y: (-planeWidth / 2) + (planeWidth / canvas.width) * j
-              });
-            } else { // j > 128
-              positions.push({
-                x: (-planeWidth / 2) + (planeWidth / canvas.width) * i,
-                y: (j - canvas.width / 2) * (planeWidth / canvas.width)
-              });
-            }
-          } else if (i >= canvas.width / 2) { // i > 128
-            if (j <= canvas.height / 2) { // j < 128
-              positions.push({
-                x: (i - canvas.width / 2) * (planeWidth / canvas.width),
-                y: (-planeWidth / 2) + (planeWidth / canvas.width) * j
-              });
-            } else { // j > 128
-              positions.push({
-                x: (i - canvas.width / 2) * (planeWidth / canvas.width),
-                y: (j - canvas.width / 2) * (planeWidth / canvas.width)
-              });
-            }
-          }
-
-        }
-      }
-      console.log(positions);
       // Placer les arbres selon la valeur de leurs position
 
     }
