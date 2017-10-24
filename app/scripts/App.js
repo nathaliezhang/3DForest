@@ -51,7 +51,6 @@ export default class App {
       this.scene.add( this.meshPlain );
 
       this.treesPosition(planeWidth, planeHeight);
-      this.createTrees(); // draw Trees
 
       /**
         Fog
@@ -66,7 +65,7 @@ export default class App {
       pointLight.position.set(30, 60, 60);
       this.scene.add( pointLight );
 
-      var pointLightHelper = new THREE.PointLightHelper( pointLight, .5 );
+      let pointLightHelper = new THREE.PointLightHelper( pointLight, .5 );
       this.scene.add( pointLightHelper );
 
     	this.renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -90,7 +89,8 @@ export default class App {
 
       // Create a canvas
       let canvas = document.createElement('canvas'),
-          ctx = canvas.getContext('2d');
+          ctx = canvas.getContext('2d'),
+          positions = [];
 
       canvas.width = 256;
       canvas.height = 256;
@@ -106,16 +106,14 @@ export default class App {
 
       texture.addEventListener('load', function() {
 
-        // console.log("I'm loaded.");
         ctx.drawImage(this, 0, 0, 256, 256);
 
         // Retrieve pixels values
         let textureData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         let data = textureData.data; // All values
         let pixels = [];
-        // console.log(data);
 
-        for (var i = 0, c = data.length; i < c; i+= 4) {
+        for (let i = 0, c = data.length; i < c; i+= 4) {
           pixels.push(
             {
               red: data[i]
@@ -125,15 +123,14 @@ export default class App {
             }
           )
         }
-        // console.log(pixels);
 
         /** CONVERT CANVAS POSITIONS TO PLANE POSITIONS **/
 
         // Convert canvas x, y positions to Plane positions
-        let positions = [];
+
         // First loop for coordinate x & second for y
-        for (var i = 0, c = canvas.width; i < c; i++) {
-          for (var j = 0, c = canvas.height; j < c; j++) {
+        for (let i = 0, c = canvas.width; i < c; i++) {
+          for (let j = 0, c = canvas.height; j < c; j++) {
 
             if (i <= canvas.width / 2) { // i < 128
               if (j <= canvas.height / 2) { // j < 128
@@ -148,7 +145,9 @@ export default class App {
                   y: (j - canvas.width / 2) * (planeWidth / canvas.width)
                 });
               }
-            } else if (i >= canvas.width / 2) { // i > 128
+            }
+
+            else if (i >= canvas.width / 2) { // i > 128
               if (j <= canvas.height / 2) { // j < 128
                 positions.push({
                   x: (i - canvas.width / 2) * (planeWidth / canvas.width),
@@ -164,30 +163,31 @@ export default class App {
 
           }
         }
-        // console.log(positions);
 
-        // Convert gray levels to z position and add to position
-        for (var i = 0, c = positions.length; i < c; i++) {
+        // Convert gray levels to z position (add to variable positions)
+        for (let i = 0, c = positions.length; i < c; i++) {
           positions[i].z  = pixels[i].red * (planeWidth / canvas.width);
         }
-        // console.log(positions);
 
       });
 
-
-
-      // Placer les arbres selon la valeur de leurs position
-
+      // console.log(positions);
+      this.createTrees(positions); // draw Trees
     }
 
-    createTrees() {
+    // Place trees according to positions values calculate previously
+    createTrees(positions) {
 
-      for (var i = 0; i < 80; i++) {
+      // console.log(positions);
+      // console.log(positions[1]);
+
+      for (let i = 0; i < 80; i++) {
         let trunkRadius = .75,
             trunkHeight = this.getRandom(2, 4),
             trunkRadiusSegments = this.getRandom(5, 8),
             trunkTreeX = this.getRandom(-150, 150), // width : 350
             trunkTreeZ = this.getRandom(-100, 100), // height : 250
+
             coneRadius = this.getRandom(2, 5),
             coneHeight = this.getRandom(8, 15),
             coneRadialSegments = this.getRandom(8, 20);
