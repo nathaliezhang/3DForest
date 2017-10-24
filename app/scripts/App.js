@@ -20,7 +20,7 @@ export default class App {
     	this.scene = new THREE.Scene();
 
       this.createTrees(); // draw Trees
-      
+
       /**
         Plain
         */
