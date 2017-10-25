@@ -5,7 +5,7 @@
 // TODO : add Stats
 
 import OrbitControls from 'three/examples/js/controls/OrbitControls';
-import PlainTexture from '../textures/texture.jpg';
+import PlainTexture from '../textures/texture2.jpg';
 
 export default class App {
 
@@ -14,7 +14,7 @@ export default class App {
       this.container = document.querySelector( '#main' );
     	document.body.appendChild( this.container );
 
-        this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 250 );
+        this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 550 );
         this.camera.position.y = 35;
         this.camera.position.z = 100;
 
@@ -24,8 +24,8 @@ export default class App {
         Plain
         */
 
-      this.planeWidth = 350;
-      this.planeHeight = 350;
+      this.planeWidth = 300;
+      this.planeHeight = 300;
 
       let plain = new THREE.PlaneGeometry(this.planeWidth, this.planeHeight, 100, 100);
       // console.log(plain);
@@ -40,7 +40,7 @@ export default class App {
         {
           color: 0x30a280,
           emissive: 0x002a25,
-          wireframe: true,
+          // wireframe: true,
           map: plainTexture,
           displacementMap: plainTexture,
           displacementScale: 20
@@ -49,6 +49,7 @@ export default class App {
 
       this.meshPlain = new THREE.Mesh( plain, plainMaterial );
       this.meshPlain.rotation.x = - Math.PI / 2;
+      // this.meshPlain.rotation.z = Math.PI / 2;
       this.scene.add( this.meshPlain );
 
       this.treesPosition();
@@ -111,6 +112,10 @@ export default class App {
       canvas.style.position = 'absolute';
       document.body.appendChild(canvas);
 
+      // ctx.fillStyle = 'red';
+      // ctx.fillRect(0, 0, 256, 10);
+      // ctx.fillStyle = 'blue';
+      // ctx.fillRect(0, 10, 256, 10);
       ctx.drawImage(this.texture, 0, 0, 256, 256);
 
       // Retrieve pixels values
@@ -122,6 +127,7 @@ export default class App {
         pixels.push(
           {
             red: data[i]
+            // ,
             // green: data[i+1],
             // blue: data[i+2],
             // alpha: data[i+3]
@@ -129,7 +135,6 @@ export default class App {
         )
       }
       // console.log(pixels);
-
       /** CONVERT CANVAS POSITIONS TO PLANE POSITIONS **/
 
       // Convert canvas x, y positions to Plane positions
@@ -171,51 +176,72 @@ export default class App {
       }
 
       // Convert gray levels to z position (add to variable positions)
+      // Read direction
       for (let i = 0, c = positions.length; i < c; i++) {
         positions[i].z  = pixels[i].red * (this.planeWidth / canvas.width);
       }
+
+      let i = 0;
+      let nbMaxI = 128;
+      let addI = 128;
+
+      while (i < positions.length) {
+        positions[i].z  = pixels[i].red * (this.planeWidth / canvas.width);
+        // console.log(i);
+        if (i === nbMaxI) {
+          i += addI;
+          nbMaxI = i + addI;
+          // console.log(nbMax);
+        }
+        i++;
+      }
+
+      let j = 128;
+      let nbMaxJ = 256;
+      let addJ = 128;
+
+      while (j < positions.length) {
+        positions[j].z  = pixels[j].red * (this.planeWidth / canvas.width);
+        // console.log(j);
+        if (j === nbMaxJ) {
+          j += addJ;
+          nbMaxJ = j + addJ;
+          // console.log(nbMax);
+        }
+        j++;
+      }
+
       // console.log(positions);
 
-      this.createTrees(positions, canvas.width); // draw Trees
+      this.createTrees(positions); // draw Trees
 
     }
 
     // Place trees according to positions values calculate previously
-    createTrees(positions, canvasWidth) {
+    createTrees(positions) {
 
-      // console.log(canvasWidth);
-      console.log(positions);
-      // console.log(positions[1]);
-
-      var treePosition = [];
+      // console.log(positions);
 
       for (let i = 0; i < 80; i++) {
         let trunkRadius = .75,
-            trunkHeight = this.getRandom(2, 4),
+            trunkHeight = this.getRandom(3, 6),
             trunkRadiusSegments = this.getRandom(5, 8),
 
-            trunkTreeX = this.getRandom(-150, 150), // width : 350
-            trunkTreeZ = this.getRandom(-100, 100), // height : 250
+            position = positions[this.getRandom(0, positions.length)],
+            zRating = 0.06,
 
-            coneRadius = this.getRandom(2, 5),
-            coneHeight = this.getRandom(8, 15),
+            // trunkTreeX = this.getRandom(-150, 150), // width : 350
+            // trunkTreeZ = this.getRandom(-100, 100), // height : 250
+
+            trunkTreeX = position.x,
+            trunkTreeY = position.z * zRating,
+            trunkTreeZ = position.y,
+
+            coneRadius = this.getRandom(3, 6),
+            coneHeight = this.getRandom(10, 18),
             coneRadialSegments = this.getRandom(8, 20);
 
-            // console.log(trunkTreeZ);
-
-        // if (trunkTreeX <= 0) {
-        //   if (trunkTreeZ <= 0) {
-        //     treePosition.push({
-        //       x: (canvasWidth / this.planeWidth) * (-this.planeWidth / 2 - trunkTreeX) * (-1),
-        //       y: (canvasWidth / this.planeWidth) * (-this.planeWidth / 2 - trunkTreeZ) * (-1)
-        //     });
-        //   }
-        // }
-        // else if (trunkTreeX >= 0) {
-        //   treePosition.push({
-        //     x: (canvasWidth / this.planeWidth) * trunkTreeX + canvasWidth / 2
-        //   });
-        // }
+            // console.log(trunkTreeY);
 
         /**
           Trunk
@@ -247,13 +273,12 @@ export default class App {
         // console.log(this.trunkTreeMesh);
         this.coneTreeMesh = new THREE.Mesh( coneTree, coneTreeMaterial );
 
-        this.trunkTreeMesh.position.set(trunkTreeX, trunkHeight / 2, trunkTreeZ);
-        this.coneTreeMesh.position.set(trunkTreeX, trunkHeight + coneHeight / 2, trunkTreeZ);
+        this.trunkTreeMesh.position.set(trunkTreeX, trunkTreeY + trunkHeight / 2, trunkTreeZ);
+        this.coneTreeMesh.position.set(trunkTreeX, trunkTreeY + trunkHeight + coneHeight / 2, trunkTreeZ);
 
         this.scene.add( this.trunkTreeMesh, this.coneTreeMesh );
       }
 
-      // console.log(treePosition);
     }
 
     render() {
