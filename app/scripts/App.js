@@ -5,7 +5,7 @@
 // TODO : add Stats
 
 import OrbitControls from 'three/examples/js/controls/OrbitControls';
-import PlainTexture from '../textures/texture2.jpg';
+import PlainTexture from '../textures/texture.jpg';
 
 export default class App {
 
@@ -49,7 +49,6 @@ export default class App {
 
       this.meshPlain = new THREE.Mesh( plain, plainMaterial );
       this.meshPlain.rotation.x = - Math.PI / 2;
-      // this.meshPlain.rotation.z = Math.PI / 2;
       this.scene.add( this.meshPlain );
 
       this.treesPosition();
@@ -58,7 +57,7 @@ export default class App {
         Fog
         */
       this.scene.background = new THREE.Color( 0xe9f8ff );
-      // this.scene.fog = new THREE.FogExp2 (0xe9f8ff, 0.008);
+      this.scene.fog = new THREE.FogExp2 (0xe9f8ff, 0.008);
 
       /**
         Light
@@ -112,10 +111,6 @@ export default class App {
       canvas.style.position = 'absolute';
       document.body.appendChild(canvas);
 
-      // ctx.fillStyle = 'red';
-      // ctx.fillRect(0, 0, 256, 10);
-      // ctx.fillStyle = 'blue';
-      // ctx.fillRect(0, 10, 256, 10);
       ctx.drawImage(this.texture, 0, 0, 256, 256);
 
       // Retrieve pixels values
@@ -126,48 +121,44 @@ export default class App {
       for (let i = 0, c = data.length; i < c; i+= 4) {
         pixels.push(
           {
-            red: data[i]
-            // ,
-            // green: data[i+1],
-            // blue: data[i+2],
-            // alpha: data[i+3]
+            red: data[i] // RGB is the same for gray levels
           }
         )
       }
       // console.log(pixels);
+
+
       /** CONVERT CANVAS POSITIONS TO PLANE POSITIONS **/
 
       // Convert canvas x, y positions to Plane positions
+      // First loop for coordinate y & second for x : from left to right, from top to bottom
+      for (let i = 0, c = canvas.height; i < c; i++) { // i < 256
+        for (let j = 0, c = canvas.width; j < c; j++) { // i < 256
 
-      // First loop for coordinate x & second for y
-      for (let i = 0, c = canvas.width; i < c; i++) {
-        for (let j = 0, c = canvas.height; j < c; j++) {
-
-          if (i <= canvas.width / 2) { // i < 128
-            if (j <= canvas.height / 2) { // j < 128
-
+          if (i <= canvas.height / 2) { // i < 128
+            if (j <= canvas.width / 2) { // j < 128
               positions.push({
-                x: (-this.planeWidth / 2) + (this.planeWidth / canvas.width) * i,
-                y: (-this.planeWidth / 2) + (this.planeWidth / canvas.width) * j
+                x: (-this.planeWidth / 2) + (this.planeWidth / canvas.width) * j,
+                y: (-this.planeWidth / 2) + (this.planeWidth / canvas.width) * i
               });
             } else { // j > 128
               positions.push({
-                x: (-this.planeWidth / 2) + (this.planeWidth / canvas.width) * i,
-                y: (j - canvas.width / 2) * (this.planeWidth / canvas.width)
+                x: (j - canvas.width / 2) * (this.planeWidth / canvas.width),
+                y: (-this.planeWidth / 2) + (this.planeWidth / canvas.width) * i
               });
             }
           }
 
-          else if (i >= canvas.width / 2) { // i > 128
-            if (j <= canvas.height / 2) { // j < 128
+          else if (i >= canvas.height / 2) { // i > 128
+            if (j <= canvas.width / 2) { // j < 128
               positions.push({
-                x: (i - canvas.width / 2) * (this.planeWidth / canvas.width),
-                y: (-this.planeWidth / 2) + (this.planeWidth / canvas.width) * j
+                x: (-this.planeWidth / 2) + (this.planeWidth / canvas.width) * j,
+                y: (i - canvas.width / 2) * (this.planeWidth / canvas.width)
               });
             } else { // j > 128
               positions.push({
-                x: (i - canvas.width / 2) * (this.planeWidth / canvas.width),
-                y: (j - canvas.width / 2) * (this.planeWidth / canvas.width)
+                x: (j - canvas.width / 2) * (this.planeWidth / canvas.width),
+                y: (i - canvas.width / 2) * (this.planeWidth / canvas.width)
               });
             }
           }
@@ -176,39 +167,8 @@ export default class App {
       }
 
       // Convert gray levels to z position (add to variable positions)
-      // Read direction
       for (let i = 0, c = positions.length; i < c; i++) {
         positions[i].z  = pixels[i].red * (this.planeWidth / canvas.width);
-      }
-
-      let i = 0;
-      let nbMaxI = 128;
-      let addI = 128;
-
-      while (i < positions.length) {
-        positions[i].z  = pixels[i].red * (this.planeWidth / canvas.width);
-        // console.log(i);
-        if (i === nbMaxI) {
-          i += addI;
-          nbMaxI = i + addI;
-          // console.log(nbMax);
-        }
-        i++;
-      }
-
-      let j = 128;
-      let nbMaxJ = 256;
-      let addJ = 128;
-
-      while (j < positions.length) {
-        positions[j].z  = pixels[j].red * (this.planeWidth / canvas.width);
-        // console.log(j);
-        if (j === nbMaxJ) {
-          j += addJ;
-          nbMaxJ = j + addJ;
-          // console.log(nbMax);
-        }
-        j++;
       }
 
       // console.log(positions);
@@ -222,17 +182,17 @@ export default class App {
 
       // console.log(positions);
 
-      for (let i = 0; i < 80; i++) {
+      for (let i = 0; i < 60; i++) {
+        
         let trunkRadius = .75,
             trunkHeight = this.getRandom(3, 6),
             trunkRadiusSegments = this.getRandom(5, 8),
 
+            // Get a random position in the Plane
             position = positions[this.getRandom(0, positions.length)],
             zRating = 0.06,
 
-            // trunkTreeX = this.getRandom(-150, 150), // width : 350
-            // trunkTreeZ = this.getRandom(-100, 100), // height : 250
-
+            // Retrieve the position
             trunkTreeX = position.x,
             trunkTreeY = position.z * zRating,
             trunkTreeZ = position.y,
@@ -240,8 +200,6 @@ export default class App {
             coneRadius = this.getRandom(3, 6),
             coneHeight = this.getRandom(10, 18),
             coneRadialSegments = this.getRandom(8, 20);
-
-            // console.log(trunkTreeY);
 
         /**
           Trunk
