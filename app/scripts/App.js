@@ -101,6 +101,7 @@ export default class App {
       CONVERT CANVAS POSITIONS TO PLANE POSITIONS
       */
     onLoadImage (event) {
+
       // console.log(this.texture);
       var positions = [];
 
@@ -169,42 +170,41 @@ export default class App {
         }
       }
 
-      // Convert gray levels to z position (add to variable positions)
+      // Convert gray levels to z position
       for (let i = 0, c = positions.length; i < c; i++) {
         positions[i].z  = pixels[i].red * ratio * scaleZ;
       }
 
       this.createTrees(positions);
       this.createStones(positions);
+      this.createMushrooms(positions);
 
     }
 
     /**
       Place trees according to positions values calculate previously
       */
+
     createTrees(positions) {
 
-      for (let i = 0; i < 60; i++) {
+      for (let i = 0; i < 80; i++) {
 
-        let trunkRadius = .75,
-            trunkHeight = this.getRandom(3, 6),
-            trunkRadiusSegments = this.getRandom(5, 8),
-
-            // Get a random position in the Plane
-            position = positions[this.getRandom(0, positions.length)],
+        // Get a random position in the Plane
+        let position = positions[this.getRandom(0, positions.length)],
 
             // Retrieve the position
             treeX = position.x,
             treeY = position.z,
-            treeZ = position.y,
-
-            coneRadius = this.getRandom(3, 6),
-            coneHeight = this.getRandom(10, 18),
-            coneRadialSegments = this.getRandom(8, 20);
+            treeZ = position.y;
 
         /**
           Trunk
           */
+
+        let trunkRadius = .75,
+            trunkHeight = this.getRandom(3, 6),
+            trunkRadiusSegments = this.getRandom(5, 8);
+
         let trunkTree = new THREE.CylinderGeometry (trunkRadius, trunkRadius, trunkHeight, trunkRadiusSegments);
         let trunkTreeMaterial = new THREE.MeshPhongMaterial(
           {
@@ -220,6 +220,11 @@ export default class App {
         /**
           Cone
           */
+
+        let coneRadius = this.getRandom(3, 6),
+            coneHeight = this.getRandom(10, 18),
+            coneRadialSegments = this.getRandom(8, 20);
+
         let coneTree = new THREE.ConeGeometry (coneRadius, coneHeight, coneRadialSegments);
         let coneTreeMaterial = new THREE.MeshPhongMaterial(
           {
@@ -230,7 +235,6 @@ export default class App {
           }
         );
 
-        // console.log(this.trunkTreeMesh);
         this.coneTreeMesh = new THREE.Mesh (coneTree, coneTreeMaterial);
         this.coneTreeMesh.position.set(treeX, treeY + trunkHeight + coneHeight / 2, treeZ);
 
@@ -239,22 +243,23 @@ export default class App {
 
     }
 
-
     /**
       Stones
       */
 
     createStones(positions) {
+
       for (let i = 0; i < 30; i++) {
-        let stroneRadius = this.getRandom(1, 4),
 
-          // Get a random position in the Plane
-          position = positions[this.getRandom(0, positions.length)],
+        // Get a random position in the Plane
+        let position = positions[this.getRandom(0, positions.length)],
 
-          // Retrieve the position
-          stoneX = position.x,
-          stoneY = position.z,
-          stoneZ = position.y;
+            // Retrieve the position
+            stoneX = position.x,
+            stoneY = position.z,
+            stoneZ = position.y;
+
+        let stroneRadius = this.getRandom(1, 3);
 
         let stone = new THREE.DodecahedronGeometry (stroneRadius);
         let stoneMaterial = new THREE.MeshPhongMaterial(
@@ -271,6 +276,68 @@ export default class App {
 
         this.scene.add( this.stoneMesh );
       }
+    }
+
+    /**
+      Mushroom
+      */
+
+    createMushrooms(positions) {
+
+      for (var i = 0; i < 40; i++) {
+        // Get a random position in the Plane
+        let position = positions[this.getRandom(0, positions.length)],
+
+            // Retrieve the position
+            mushroomX = position.x,
+            mushroomY = position.z,
+            mushroomZ = position.y;
+
+        /**
+          Steam
+          */
+
+        let stemRadius = .5,
+            stemHeight = this.getRandom(2, 3),
+            stemRadiusSegments = this.getRandom(5, 10);
+
+        let stem = new THREE.CylinderGeometry (stemRadius, stemRadius, stemHeight, stemRadiusSegments);
+        let stemMaterial = new THREE.MeshPhongMaterial(
+          {
+            color: 0xf0e4d7,
+            emissive: 0xdbd0c4,
+            specular: 0xfcfaf7,
+            shininess: 5
+          }
+        );
+
+        this.stemMesh = new THREE.Mesh (stem, stemMaterial);
+        this.stemMesh.position.set(mushroomX, mushroomY + stemHeight / 2 , mushroomZ);
+
+        /**
+          Cap
+          */
+        let capTopRadius = .75,
+            capBottomRadius = capTopRadius * this.getRandom(2, 4),
+            capHeight = this.getRandom(1, 3),
+            capRadiusSegments = this.getRandom(5, 15);
+
+        let cap = new THREE.CylinderGeometry (capTopRadius, capBottomRadius, capHeight, capRadiusSegments);
+        let capMaterial = new THREE.MeshPhongMaterial(
+          {
+            color: 0xc2b8ac,
+            emissive: 0xaca397,
+            specular: 0xd7d0c6,
+            shininess: 5
+          }
+        );
+
+        this.capMesh = new THREE.Mesh (cap, capMaterial);
+        this.capMesh.position.set(mushroomX, mushroomY + stemHeight + capHeight / 2 , mushroomZ);
+
+        this.scene.add( this.stemMesh, this.capMesh );
+      }
+
     }
 
     render() {
