@@ -5,7 +5,9 @@
 // TODO : add Stats
 
 import OrbitControls from 'three/examples/js/controls/OrbitControls';
-import PlainTexture from '../textures/texture.jpg';
+import PlainTexture from '../assets/textures/texture.jpg';
+// import Sound from './Sound';
+// import Music from '../assets/sound/Sublustris Nox - Lost In the Woods.mp3';
 
 export default class App {
 
@@ -19,6 +21,8 @@ export default class App {
         this.camera.position.z = 80;
 
     	this.scene = new THREE.Scene();
+
+      // this.audio = new Sound(Music);
 
       /**
         Plain
@@ -46,9 +50,9 @@ export default class App {
         }
       );
 
-      this.meshPlain = new THREE.Mesh( plane, planeMaterial );
-      this.meshPlain.rotation.x = - Math.PI / 2;
-      this.scene.add( this.meshPlain );
+      this.meshPlane = new THREE.Mesh( plane, planeMaterial );
+      this.meshPlane.rotation.x = - Math.PI / 2;
+      this.scene.add( this.meshPlane );
 
       this.treesPosition();
 
@@ -129,7 +133,7 @@ export default class App {
       for (let i = 0, c = data.length; i < c; i+= 4) {
         pixels.push(
           {
-            red: data[i] // RGB is the same for gray levels
+            red: data[i] // R,G,B are the same for gray levels
           }
         )
       }
@@ -182,7 +186,7 @@ export default class App {
     }
 
     /**
-      Place trees according to positions values calculate previously
+      Trees : place elements according to the positions calculate previously
       */
 
     createTrees(positions) {
@@ -238,7 +242,28 @@ export default class App {
         this.coneTreeMesh = new THREE.Mesh (coneTree, coneTreeMaterial);
         this.coneTreeMesh.position.set(treeX, treeY + trunkHeight + coneHeight / 2, treeZ);
 
-        this.scene.add( this.trunkTreeMesh, this.coneTreeMesh );
+        /**
+          Second Cone
+          */
+
+        let secondConeRadius = coneRadius - 1,
+            secondConeHeight = coneHeight - 2,
+            secondConeRadialSegments = coneRadialSegments;
+
+        let secondConeTree = new THREE.ConeGeometry (secondConeRadius, secondConeHeight, secondConeRadialSegments);
+        let secondConeTreeMaterial = new THREE.MeshPhongMaterial(
+          {
+            color: 0xffffff,
+            emissive: 0x1a5e38,
+            specular: 0x75b490,
+            shininess: 10
+          }
+        );
+
+        this.secondConeTreeMesh = new THREE.Mesh (secondConeTree, secondConeTreeMaterial);
+        this.secondConeTreeMesh.position.set(treeX, treeY + trunkHeight + coneHeight / 2 + secondConeHeight / 2, treeZ);
+
+        this.scene.add( this.trunkTreeMesh, this.coneTreeMesh, this.secondConeTreeMesh );
       }
 
     }
@@ -272,14 +297,14 @@ export default class App {
         );
 
         this.stoneMesh = new THREE.Mesh (stone, stoneMaterial);
-        this.stoneMesh.position.set(stoneX, stoneY + stroneRadius, stoneZ);
+        this.stoneMesh.position.set(stoneX, stoneY + stroneRadius / 2, stoneZ);
 
         this.scene.add( this.stoneMesh );
       }
     }
 
     /**
-      Mushroom
+      Mushrooms
       */
 
     createMushrooms(positions) {
