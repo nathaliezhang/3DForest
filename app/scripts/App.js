@@ -398,6 +398,7 @@ export default class App {
 
       // Get amplitude
       var frequencies = this.audio.getSpectrum();
+      var backgroundColor = [0x064459, 0x395658];
 
       for(var i = 0, c = frequencies.length; i < c; i++) {
         var frequencyMax = 230;
@@ -408,12 +409,19 @@ export default class App {
           for (let i = 0, c = this.cones.length; i < c ; i++) {
             for (let j = 0, c = this.cones[i].length; j < c; j++) {
               // console.log(this.cones[i][j]);
-              // Find a way to update the position (easeOutBack)
+              // Find a way to update the position x, z and y (easeOutBack)
               let oldPosition = this.cones[i][j].rotation;
               oldPosition.set(oldPosition.x, oldPosition.y + .15, oldPosition.z);
 
             }
           }
+
+          // Change background color
+          var randomColor = backgroundColor[this.getRandom(0, backgroundColor.length)];
+          this.scene.background = new THREE.Color( randomColor );
+          this.scene.fog = new THREE.FogExp2 (randomColor, 0.01);
+
+          // Create firefly
 
         }
 
