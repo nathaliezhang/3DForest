@@ -17,8 +17,8 @@ export default class App {
     	document.body.appendChild( this.container );
 
         this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 550 );
-        this.camera.position.y = 40;
-        this.camera.position.z = 80;
+        this.camera.position.y = 60;
+        this.camera.position.z = 130;
 
     	this.scene = new THREE.Scene();
 
@@ -127,7 +127,7 @@ export default class App {
       let textureData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       let data = textureData.data; // All values
       let pixels = [];
-      let scaleZ = 0.095; // Scale of the position z
+      let scaleZ = 0.08; // Scale of the position z
       let ratio = this.planeWidth / canvas.width;
 
       for (let i = 0, c = data.length; i < c; i+= 4) {
@@ -186,12 +186,14 @@ export default class App {
     }
 
     /**
-      Trees : place elements according to the positions calculate previously
+      TREES : place elements according to the positions calculate previously
       */
 
     createTrees(positions) {
 
-      for (let i = 0; i < 80; i++) {
+      var nbTrees = 100;
+
+      for (let i = 0; i < nbTrees; i++) {
 
         // Get a random position in the Plane
         let position = positions[this.getRandom(0, positions.length)],
@@ -206,7 +208,7 @@ export default class App {
           */
 
         let trunkRadius = .75,
-            trunkHeight = this.getRandom(3, 6),
+            trunkHeight = this.getRandom(4, 6),
             trunkRadiusSegments = this.getRandom(5, 8);
 
         let trunkTree = new THREE.CylinderGeometry (trunkRadius, trunkRadius, trunkHeight, trunkRadiusSegments);
@@ -219,62 +221,59 @@ export default class App {
         );
 
         this.trunkTreeMesh = new THREE.Mesh (trunkTree, trunkTreeMaterial);
-        this.trunkTreeMesh.position.set(treeX, treeY + trunkHeight / 2, treeZ);
+        this.trunkTreeMesh.position.set(treeX, treeY + trunkHeight, treeZ);
+        this.scene.add( this.trunkTreeMesh );
 
         /**
-          Cone
+          Cones
           */
 
-        let coneRadius = this.getRandom(3, 6),
+        var cones = [];
+
+        var nbCones = this.getRandom(2, 5),
+            coneRadius = this.getRandom(4, 8),
             coneHeight = this.getRandom(10, 18),
-            coneRadialSegments = this.getRandom(8, 20);
+            coneRadialSegments = this.getRandom(8, 20),
+            coneY = treeY + trunkHeight + coneHeight / 2; // Position Y of the cone
 
-        let coneTree = new THREE.ConeGeometry (coneRadius, coneHeight, coneRadialSegments);
-        let coneTreeMaterial = new THREE.MeshPhongMaterial(
-          {
-            color: 0x2c714a,
-            emissive: 0x1a5e38,
-            specular: 0x75b490,
-            shininess: 10
-          }
-        );
 
-        this.coneTreeMesh = new THREE.Mesh (coneTree, coneTreeMaterial);
-        this.coneTreeMesh.position.set(treeX, treeY + trunkHeight + coneHeight / 2, treeZ);
+        // Loop to create trees with multiples cones
+        for (let i = 0; i < nbCones; i++) {
 
-        /**
-          Second Cone
-          */
+          let coneTree = new THREE.ConeGeometry (coneRadius, coneHeight, coneRadialSegments);
+          let coneTreeMaterial = new THREE.MeshPhongMaterial(
+            {
+              color: 0x2c714a,
+              emissive: 0x1a5e38,
+              specular: 0x75b490,
+              shininess: 10
+            }
+          );
 
-        let secondConeRadius = coneRadius - 1,
-            secondConeHeight = coneHeight - 2,
-            secondConeRadialSegments = coneRadialSegments;
+          this.coneTreeMesh = new THREE.Mesh (coneTree, coneTreeMaterial);
+          this.coneTreeMesh.position.set(treeX, coneY, treeZ);
 
-        let secondConeTree = new THREE.ConeGeometry (secondConeRadius, secondConeHeight, secondConeRadialSegments);
-        let secondConeTreeMaterial = new THREE.MeshPhongMaterial(
-          {
-            color: 0xffffff,
-            emissive: 0x1a5e38,
-            specular: 0x75b490,
-            shininess: 10
-          }
-        );
+          cones[i] = this.coneTreeMesh;
+          coneRadius = cones[i].geometry.parameters.radius - 1;
+          coneHeight = cones[i].geometry.parameters.height - 2;
+          coneY += coneHeight / 2;
 
-        this.secondConeTreeMesh = new THREE.Mesh (secondConeTree, secondConeTreeMaterial);
-        this.secondConeTreeMesh.position.set(treeX, treeY + trunkHeight + coneHeight / 2 + secondConeHeight / 2, treeZ);
+          this.scene.add( this.coneTreeMesh );
+        }
 
-        this.scene.add( this.trunkTreeMesh, this.coneTreeMesh, this.secondConeTreeMesh );
       }
 
-    }
+    } // End createTrees
 
     /**
-      Stones
+      STONES
       */
 
     createStones(positions) {
 
-      for (let i = 0; i < 30; i++) {
+      var nbStones = 110;
+
+      for (let i = 0; i < nbStones; i++) {
 
         // Get a random position in the Plane
         let position = positions[this.getRandom(0, positions.length)],
@@ -304,12 +303,15 @@ export default class App {
     }
 
     /**
-      Mushrooms
+      MUSHROOMS
       */
 
     createMushrooms(positions) {
 
-      for (var i = 0; i < 40; i++) {
+      var nbMushrooms = 100;
+
+      for (var i = 0; i < nbMushrooms; i++) {
+
         // Get a random position in the Plane
         let position = positions[this.getRandom(0, positions.length)],
 
