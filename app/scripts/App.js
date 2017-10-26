@@ -5,7 +5,7 @@
 // TODO : add Stats
 
 import OrbitControls from 'three/examples/js/controls/OrbitControls';
-import PlainTexture from '../assets/textures/texture.jpg';
+import PlainTexture from '../assets/textures/plain.jpg';
 import Sound from './Sound';
 import Music from '../assets/sound/Sublustris Nox - Lost In the Woods.mp3';
 
@@ -29,7 +29,7 @@ export default class App {
       this.audio = new Sound( Music, 100, 4, function() {
         // console.log(this);
         this.audio.play();
-      }.bind(this), true );
+      }.bind(this), false );
 
       this.addEventListener();
       /**
@@ -39,26 +39,26 @@ export default class App {
       this.planeWidth = 300;
       this.planeHeight = 300;
 
-      let plane = new THREE.PlaneGeometry(this.planeWidth, this.planeHeight, 150, 150);
+      let plain = new THREE.PlaneGeometry(this.planeWidth, this.planeHeight, 150, 150);
       // console.log(plain.vertices);
-      let planeTextureLoader = new THREE.TextureLoader();
-      let planeTexture = planeTextureLoader.load(PlainTexture);
+      let plainTextureLoader = new THREE.TextureLoader();
+      let plainTexture = plainTextureLoader.load(PlainTexture);
 
-      planeTexture.wrapS = THREE.RepeatWrapping;
-      planeTexture.wrapT = THREE.RepeatWrapping;
+      plainTexture.wrapS = THREE.RepeatWrapping;
+      plainTexture.wrapT = THREE.RepeatWrapping;
 
-      let planeMaterial = new THREE.MeshPhongMaterial(
+      let plainMaterial = new THREE.MeshPhongMaterial(
         {
           color: 0x30a280,
           emissive: 0x002a25,
           // wireframe: true,
-          map: planeTexture,
-          displacementMap: planeTexture,
+          map: plainTexture,
+          displacementMap: plainTexture,
           displacementScale: 30
         }
       );
 
-      this.meshPlane = new THREE.Mesh( plane, planeMaterial );
+      this.meshPlane = new THREE.Mesh( plain, plainMaterial );
       this.meshPlane.rotation.x = - Math.PI / 2;
       this.scene.add( this.meshPlane );
 
@@ -203,7 +203,7 @@ export default class App {
 
     createTrees(positions) {
 
-      var nbTrees = 200;
+      var nbTrees = 20;
 
       for (let i = 0; i < nbTrees; i++) {
 
@@ -286,7 +286,7 @@ export default class App {
 
     createStones(positions) {
 
-      var nbStones = 140;
+      var nbStones = 5;
 
       for (let i = 0; i < nbStones; i++) {
 
@@ -323,7 +323,7 @@ export default class App {
 
     createMushrooms(positions) {
 
-      var nbMushrooms = 100;
+      var nbMushrooms = 50;
 
       for (var i = 0; i < nbMushrooms; i++) {
 
@@ -340,7 +340,7 @@ export default class App {
           */
 
         let stemRadius = .5,
-            stemHeight = this.getRandom(2, 3),
+            stemHeight = this.getRandom(2, 4),
             stemRadiusSegments = this.getRandom(5, 10);
 
         let stem = new THREE.CylinderGeometry (stemRadius, stemRadius, stemHeight, stemRadiusSegments);
@@ -349,7 +349,7 @@ export default class App {
             color: 0xf0e4d7,
             emissive: 0xdbd0c4,
             specular: 0xfcfaf7,
-            shininess: 5
+            shininess: 2
           }
         );
 
@@ -359,23 +359,25 @@ export default class App {
         /**
           Cap
           */
-        let capTopRadius = .75,
-            capBottomRadius = capTopRadius * this.getRandom(2, 4),
-            capHeight = this.getRandom(1, 3),
-            capRadiusSegments = this.getRandom(5, 15);
+        let capRadius = this.getRandom(2, 3),
+            widthSegments = this.getRandom(5, 10),
+            heightSegments = this.getRandom(5, 10),
+            capPhiStart = 0,
+            capPhiLength = Math.PI;
 
-        let cap = new THREE.CylinderGeometry (capTopRadius, capBottomRadius, capHeight, capRadiusSegments);
+        let cap = new THREE.SphereGeometry(capRadius, widthSegments, heightSegments, capPhiStart, capPhiLength)
         let capMaterial = new THREE.MeshPhongMaterial(
           {
             color: 0xc2b8ac,
             emissive: 0xaca397,
             specular: 0xd7d0c6,
-            shininess: 5
+            shininess: 2
           }
         );
 
         this.capMesh = new THREE.Mesh (cap, capMaterial);
-        this.capMesh.position.set(mushroomX, mushroomY + stemHeight + capHeight / 2 , mushroomZ);
+        this.capMesh.rotation.x = -Math.PI / 2;
+        this.capMesh.position.set(mushroomX, mushroomY + stemHeight , mushroomZ);
 
         this.scene.add( this.stemMesh, this.capMesh );
       }
