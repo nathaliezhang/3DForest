@@ -6,8 +6,8 @@
 
 import OrbitControls from 'three/examples/js/controls/OrbitControls';
 import PlainTexture from '../assets/textures/texture.jpg';
-// import Sound from './Sound';
-// import Music from '../assets/sound/Sublustris Nox - Lost In the Woods.mp3';
+import Sound from './Sound';
+import Music from '../assets/sound/Sublustris Nox - Lost In the Woods.mp3';
 
 export default class App {
 
@@ -18,11 +18,20 @@ export default class App {
 
         this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 550 );
         this.camera.position.y = 60;
-        this.camera.position.z = 130;
+        this.camera.position.z = 150;
 
     	this.scene = new THREE.Scene();
 
-      // this.audio = new Sound(Music);
+      /**
+        Play Sound
+        */
+
+      this.audio = new Sound( Music, 100, 4, function() {
+        // console.log(this);
+        this.audio.play();
+      }.bind(this), true );
+
+      this.addEventListener();
 
       /**
         Plain
@@ -31,7 +40,7 @@ export default class App {
       this.planeWidth = 300;
       this.planeHeight = 300;
 
-      let plane = new THREE.PlaneGeometry(this.planeWidth, this.planeHeight, 100, 100);
+      let plane = new THREE.PlaneGeometry(this.planeWidth, this.planeHeight, 150, 150);
       // console.log(plain.vertices);
       let planeTextureLoader = new THREE.TextureLoader();
       let planeTexture = planeTextureLoader.load(PlainTexture);
@@ -191,7 +200,7 @@ export default class App {
 
     createTrees(positions) {
 
-      var nbTrees = 100;
+      var nbTrees = 200;
 
       for (let i = 0; i < nbTrees; i++) {
 
@@ -232,10 +241,9 @@ export default class App {
 
         var nbCones = this.getRandom(2, 5),
             coneRadius = this.getRandom(4, 8),
-            coneHeight = this.getRandom(10, 18),
+            coneHeight = this.getRandom(12, 18),
             coneRadialSegments = this.getRandom(8, 20),
             coneY = treeY + trunkHeight + coneHeight / 2; // Position Y of the cone
-
 
         // Loop to create trees with multiples cones
         for (let i = 0; i < nbCones; i++) {
@@ -271,7 +279,7 @@ export default class App {
 
     createStones(positions) {
 
-      var nbStones = 110;
+      var nbStones = 140;
 
       for (let i = 0; i < nbStones; i++) {
 
@@ -308,7 +316,7 @@ export default class App {
 
     createMushrooms(positions) {
 
-      var nbMushrooms = 100;
+      var nbMushrooms = 120;
 
       for (var i = 0; i < nbMushrooms; i++) {
 
@@ -365,6 +373,27 @@ export default class App {
         this.scene.add( this.stemMesh, this.capMesh );
       }
 
+    }
+
+    /**
+      addEventListener
+      */
+
+    addEventListener() {
+
+      // Pause and play
+      document.addEventListener('keydown', function(e){
+        var key = e.keyCode;
+        if ( key === 32 ) {
+          if ( this.audio._isPlaying === true ) {
+            this.audio.pause();
+          } else {
+            this.audio.play();
+          }
+        }
+        // console.log(this.audio);
+      }.bind(this));
+      
     }
 
     render() {
