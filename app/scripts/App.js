@@ -17,8 +17,8 @@ export default class App {
     	document.body.appendChild( this.container );
 
         this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 550 );
-        this.camera.position.y = 60;
-        this.camera.position.z = 150;
+        this.camera.position.y = 40;
+        this.camera.position.z = 180;
 
     	this.scene = new THREE.Scene();
 
@@ -32,7 +32,6 @@ export default class App {
       }.bind(this), true );
 
       this.addEventListener();
-
       /**
         Plain
         */
@@ -86,6 +85,8 @@ export default class App {
     	this.renderer.setSize( window.innerWidth, window.innerHeight );
     	this.container.appendChild( this.renderer.domElement );
 
+      /** Cone*/
+      this.cones = [];
       /**
         Debug controls : after camera and renderer
         */
@@ -93,9 +94,11 @@ export default class App {
       controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
 
     	window.addEventListener('resize', this.onWindowResize.bind(this), false);
-        this.onWindowResize();
+      this.onWindowResize();
 
-        this.renderer.animate( this.render.bind(this) );
+      this.renderer.animate( this.render.bind(this) );
+
+      this.frame();
     }
 
     /**
@@ -261,6 +264,7 @@ export default class App {
           this.coneTreeMesh = new THREE.Mesh (coneTree, coneTreeMaterial);
           this.coneTreeMesh.position.set(treeX, coneY, treeZ);
 
+
           cones[i] = this.coneTreeMesh;
           coneRadius = cones[i].geometry.parameters.radius - 1;
           coneHeight = cones[i].geometry.parameters.height - 2;
@@ -268,6 +272,9 @@ export default class App {
 
           this.scene.add( this.coneTreeMesh );
         }
+
+        this.cones.push(cones);
+        // console.log(this.cones);
 
       }
 
@@ -304,7 +311,7 @@ export default class App {
         );
 
         this.stoneMesh = new THREE.Mesh (stone, stoneMaterial);
-        this.stoneMesh.position.set(stoneX, stoneY + stroneRadius / 2, stoneZ);
+        this.stoneMesh.position.set(stoneX, stoneY + stroneRadius, stoneZ);
 
         this.scene.add( this.stoneMesh );
       }
@@ -316,7 +323,7 @@ export default class App {
 
     createMushrooms(positions) {
 
-      var nbMushrooms = 120;
+      var nbMushrooms = 100;
 
       for (var i = 0; i < nbMushrooms; i++) {
 
@@ -347,7 +354,7 @@ export default class App {
         );
 
         this.stemMesh = new THREE.Mesh (stem, stemMaterial);
-        this.stemMesh.position.set(mushroomX, mushroomY + stemHeight / 2 , mushroomZ);
+        this.stemMesh.position.set(mushroomX, mushroomY + stemHeight, mushroomZ);
 
         /**
           Cap
@@ -376,6 +383,30 @@ export default class App {
     }
 
     /**
+      Analyse the sound
+      */
+
+    analyseSound() {
+      var frequencies = this.audio.getSpectrum();
+      // console.log(frequencies);
+
+      for(var i = 0, c = frequencies.length; i < c; i++) {
+        var frequencyMax = 120;
+
+        if (frequencies[i] > frequencyMax ) {
+          // for (var i = 0, c = this.cones.length; i < c ; i++) {
+          //   console.log(this.cones[i].length);
+          //   for (var i = 0, c = this.cones[i].length; i < c; i++) {
+          //     console.log(this.cones[i].position);
+          //     // console.log(this.cones[i].position);
+          //   }
+          // }
+        }
+
+      }
+    }
+
+    /**
       addEventListener
       */
 
@@ -393,10 +424,16 @@ export default class App {
         }
         // console.log(this.audio);
       }.bind(this));
-      
+
+    }
+
+    frame() {
+      requestAnimationFrame(this.frame.bind(this));
+      this.render;
     }
 
     render() {
+      this.analyseSound();
 
         // this.mesh.rotation.x += 0.01;
         // this.mesh.rotation.y += 0.02;

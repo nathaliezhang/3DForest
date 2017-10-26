@@ -240,13 +240,13 @@ export default class Sound {
 
         let sum = 0;
         let spectrum = this.getSpectrum();
-        if ( endFreq !== undefined ) {
+        if ( endFreq !== null && endFreq !== undefined ) {
             for ( var i = freq; i <= endFreq; i++ ) {
                 sum += spectrum[ i ];
             }
             return sum / ( endFreq - freq + 1 );
         } else {
-            return spectrum[ freq ];
+            return spectrum[freq];
         }
     }
 
