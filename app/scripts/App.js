@@ -16,9 +16,12 @@ export default class App {
       this.container = document.querySelector( '#main' );
     	document.body.appendChild( this.container );
 
-        this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 550 );
-        this.camera.position.y = 40;
-        this.camera.position.z = 180;
+      /**
+        Camera
+        */
+      this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 550 );
+      this.camera.position.y = 40;
+      this.camera.position.z = 180;
 
     	this.scene = new THREE.Scene();
 
@@ -26,16 +29,16 @@ export default class App {
         Play Sound
         */
 
-      this.audio = new Sound( Music, 100, 4, function() {
+      this.audio = new Sound( Music, 100, 0, function() {
         // console.log(this);
         this.audio.play();
       }.bind(this), false );
 
       this.addEventListener();
+
       /**
         Plain
         */
-
       this.planeWidth = 300;
       this.planeHeight = 300;
 
@@ -87,6 +90,7 @@ export default class App {
 
       /** Cone*/
       this.cones = [];
+
       /**
         Debug controls : after camera and renderer
         */
@@ -203,7 +207,7 @@ export default class App {
 
     createTrees(positions) {
 
-      var nbTrees = 20;
+      var nbTrees = 100;
 
       for (let i = 0; i < nbTrees; i++) {
 
@@ -221,7 +225,7 @@ export default class App {
 
         let trunkRadius = .75,
             trunkHeight = this.getRandom(4, 6),
-            trunkRadiusSegments = this.getRandom(5, 8);
+            trunkRadiusSegments = this.getRandom(4, 8);
 
         let trunkTree = new THREE.CylinderGeometry (trunkRadius, trunkRadius, trunkHeight, trunkRadiusSegments);
         let trunkTreeMaterial = new THREE.MeshPhongMaterial(
@@ -245,7 +249,7 @@ export default class App {
         var nbCones = this.getRandom(2, 5),
             coneRadius = this.getRandom(4, 8),
             coneHeight = this.getRandom(12, 18),
-            coneRadialSegments = this.getRandom(8, 20),
+            coneRadialSegments = this.getRandom(5, 10), // 8, 20
             coneY = treeY + trunkHeight + coneHeight / 2; // Position Y of the cone
 
         // Loop to create trees with multiples cones
@@ -264,18 +268,20 @@ export default class App {
           this.coneTreeMesh = new THREE.Mesh (coneTree, coneTreeMaterial);
           this.coneTreeMesh.position.set(treeX, coneY, treeZ);
 
-
+          // new properties for each loop
           cones[i] = this.coneTreeMesh;
           coneRadius = cones[i].geometry.parameters.radius - 1;
           coneHeight = cones[i].geometry.parameters.height - 2;
           coneY += coneHeight / 2;
+
+          // this.cones.push(this.coneTreeMesh);
+          // console.log(this.cones);
 
           this.scene.add( this.coneTreeMesh );
         }
 
         this.cones.push(cones);
         // console.log(this.cones);
-
       }
 
     } // End createTrees
@@ -389,20 +395,26 @@ export default class App {
       */
 
     analyseSound() {
+
+      // Get amplitude
       var frequencies = this.audio.getSpectrum();
-      // console.log(frequencies);
 
       for(var i = 0, c = frequencies.length; i < c; i++) {
-        var frequencyMax = 120;
+        var frequencyMax = 230;
 
-        if (frequencies[i] > frequencyMax ) {
-          // for (var i = 0, c = this.cones.length; i < c ; i++) {
-          //   console.log(this.cones[i].length);
-          //   for (var i = 0, c = this.cones[i].length; i < c; i++) {
-          //     console.log(this.cones[i].position);
-          //     // console.log(this.cones[i].position);
-          //   }
-          // }
+        if (frequencies[i] >= frequencyMax ) {
+
+          // Move cones
+          for (let i = 0, c = this.cones.length; i < c ; i++) {
+            for (let j = 0, c = this.cones[i].length; j < c; j++) {
+              // console.log(this.cones[i][j]);
+              // Find a way to update the position (easeOutBack)
+              let oldPosition = this.cones[i][j].rotation;
+              oldPosition.set(oldPosition.x, oldPosition.y + .15, oldPosition.z);
+
+            }
+          }
+
         }
 
       }
