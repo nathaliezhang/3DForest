@@ -389,7 +389,7 @@ export default class App {
       // Get amplitude
       var frequencies = this.audio.getSpectrum();
       var backgroundColor = [0x064459, 0x395658];
-      var angle = .1;
+      // var angle = .1;
       // console.log(this.angle);
 
       // Retrieve all frequencies
@@ -397,23 +397,24 @@ export default class App {
       // Pour chaque arbre, récupérer la zone de fréquences
       // Jump en fonction de la fréquence
 
-      if (this.angle >= Math.PI * 2) {
-        this.move = 'down';
-      } else if (this.angle < 0) {
-        this.move = 'up';
-      }
-
-      if (this.move === 'down') {
-        // console.log('down');
-        this.angle -= angle;
-      } else if (this.move === 'up') {
-        // console.log('up');
-        this.angle += angle;
-      }
+      // if (this.angle >= Math.PI * 2) {
+      //   this.move = 'down';
+      // } else if (this.angle < 0) {
+      //   this.move = 'up';
+      // }
+      //
+      // if (this.move === 'down') {
+      //   // console.log('down');
+      //   this.angle -= angle;
+      // } else if (this.move === 'up') {
+      //   // console.log('up');
+      //   this.angle += angle;
+      // }
 
       for(var i = 0, c = frequencies.length; i < c; i++) {
         var frequencyMax1 = 230;
         var frequencyMax2 = 280;
+        console.log(frequencies[i]);
 
         if (frequencies[i] >= frequencyMax1 ) {
 
