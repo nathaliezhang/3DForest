@@ -1,17 +1,21 @@
-// example import asset
+Tools// example import asset
 // import imgPath from './assets/img.jpg';
 
 // TODO : add Dat.GUI
 // TODO : add Stats
 
+import Tools from './Tools';
 import OrbitControls from 'three/examples/js/controls/OrbitControls';
 import PlainTexture from '../assets/textures/plain.jpg';
 import Sound from './Sound';
+import Tree from './Tree';
 import Music from '../assets/sound/Sublustris Nox - Lost In the Woods.mp3';
 
 export default class App {
 
     constructor() {
+
+      this.debug = true;
 
       this.container = document.querySelector( '#main' );
     	document.body.appendChild( this.container );
@@ -32,7 +36,47 @@ export default class App {
       this.audio = new Sound( Music, 100, 0, function() {
         // console.log(this);
         this.audio.play();
-      }.bind(this), false );
+      }.bind(this), true );
+
+      /**
+        Kick
+        */
+
+      /** /!\ ADD A KICK FOR MUSHROOMS /!\ **/
+
+      let kickSwing = this.audio.createKick({
+        frequency: [15, 20],
+        threshold: 150, // seuil
+        decay: 1,
+        onKick: () => {
+          for (let i = 0, c = this.trees.length; i < c ; i++) {
+            this.trees[i].swing();
+          }
+        },
+        offKick: () => {
+          for (let i = 0, c = this.trees.length; i < c ; i++) {
+            this.trees[i].update();
+          }
+        }
+      });
+      kickSwing.on();
+
+      let kickJump = this.audio.createKick({
+        frequency: [60, 70],
+        threshold: 120,
+        decay: 1,
+        onKick: () => {
+          for (let i = 0, c = this.trees.length; i < c ; i++) {
+            this.trees[i].jump();
+          }
+        },
+        offKick: () => {
+          for (let i = 0, c = this.trees.length; i < c ; i++) {
+            this.trees[i].update();
+          }
+        }
+      });
+      // kickJump.on();
 
       this.addEventListener();
 
@@ -71,7 +115,7 @@ export default class App {
         Fog
         */
       this.scene.background = new THREE.Color( 0xe9f8ff );
-      this.scene.fog = new THREE.FogExp2 (0xe9f8ff, 0.01);
+      if (!this.debug) this.scene.fog = new THREE.FogExp2 (0xe9f8ff, 0.01);
 
       /**
         Light
@@ -89,7 +133,9 @@ export default class App {
     	this.container.appendChild( this.renderer.domElement );
 
       /** Cone*/
-      this.cones = [];
+      this.trees = [];
+      this.angle = 0;
+      this.move = 'up';
 
       /**
         Debug controls : after camera and renderer
@@ -207,80 +253,25 @@ export default class App {
 
     createTrees(positions) {
 
-      var nbTrees = 100;
+      var nbTrees = 250;
 
       for (let i = 0; i < nbTrees; i++) {
 
+        // let tree = new THREE.Group();
+        // this.scene.add(tree);
+
         // Get a random position in the Plane
-        let position = positions[this.getRandom(0, positions.length)],
+        let position = positions[Tools.getRandom(0, positions.length)];
 
-            // Retrieve the position
-            treeX = position.x,
-            treeY = position.z,
-            treeZ = position.y;
+        // Retrieve the position
+        let tree = new Tree(position);
 
-        /**
-          Trunk
-          */
+        tree.defaultPositionY = position.z;
+        // console.log(tree.defaultPositionY);
 
-        let trunkRadius = .75,
-            trunkHeight = this.getRandom(4, 6),
-            trunkRadiusSegments = this.getRandom(4, 8);
-
-        let trunkTree = new THREE.CylinderGeometry (trunkRadius, trunkRadius, trunkHeight, trunkRadiusSegments);
-        let trunkTreeMaterial = new THREE.MeshPhongMaterial(
-          {
-            color: 0x55503d,
-            emissive: 0x393524,
-            specular: 0xffffff
-          }
-        );
-
-        this.trunkTreeMesh = new THREE.Mesh (trunkTree, trunkTreeMaterial);
-        this.trunkTreeMesh.position.set(treeX, treeY + trunkHeight, treeZ);
-        this.scene.add( this.trunkTreeMesh );
-
-        /**
-          Cones
-          */
-
-        var cones = [];
-
-        var nbCones = this.getRandom(2, 5),
-            coneRadius = this.getRandom(4, 8),
-            coneHeight = this.getRandom(12, 18),
-            coneRadialSegments = this.getRandom(5, 10), // 8, 20
-            coneY = treeY + trunkHeight + coneHeight / 2; // Position Y of the cone
-
-        // Loop to create trees with multiples cones
-        for (let i = 0; i < nbCones; i++) {
-
-          let coneTree = new THREE.ConeGeometry (coneRadius, coneHeight, coneRadialSegments);
-          let coneTreeMaterial = new THREE.MeshPhongMaterial(
-            {
-              color: 0x2c714a,
-              emissive: 0x1a5e38,
-              specular: 0x75b490,
-              shininess: 10
-            }
-          );
-
-          this.coneTreeMesh = new THREE.Mesh (coneTree, coneTreeMaterial);
-          this.coneTreeMesh.position.set(treeX, coneY, treeZ);
-
-          // new properties for each loop
-          cones[i] = this.coneTreeMesh;
-          coneRadius = cones[i].geometry.parameters.radius - 1;
-          coneHeight = cones[i].geometry.parameters.height - 2;
-          coneY += coneHeight / 2;
-
-          // this.cones.push(this.coneTreeMesh);
-          // console.log(this.cones);
-
-          this.scene.add( this.coneTreeMesh );
-        }
-
-        this.cones.push(cones);
+        tree.position.set(position.x, position.z, position.y);
+        this.scene.add(tree);
+        this.trees.push(tree);
         // console.log(this.cones);
       }
 
@@ -292,19 +283,19 @@ export default class App {
 
     createStones(positions) {
 
-      var nbStones = 5;
+      var nbStones = 120;
 
       for (let i = 0; i < nbStones; i++) {
 
         // Get a random position in the Plane
-        let position = positions[this.getRandom(0, positions.length)],
+        let position = positions[Tools.getRandom(0, positions.length)],
 
             // Retrieve the position
             stoneX = position.x,
             stoneY = position.z,
             stoneZ = position.y;
 
-        let stroneRadius = this.getRandom(1, 3);
+        let stroneRadius = Tools.getRandom(1, 3);
 
         let stone = new THREE.DodecahedronGeometry (stroneRadius);
         let stoneMaterial = new THREE.MeshPhongMaterial(
@@ -329,12 +320,12 @@ export default class App {
 
     createMushrooms(positions) {
 
-      var nbMushrooms = 50;
+      var nbMushrooms = 100;
 
       for (var i = 0; i < nbMushrooms; i++) {
 
         // Get a random position in the Plane
-        let position = positions[this.getRandom(0, positions.length)],
+        let position = positions[Tools.getRandom(0, positions.length)],
 
             // Retrieve the position
             mushroomX = position.x,
@@ -346,8 +337,8 @@ export default class App {
           */
 
         let stemRadius = .5,
-            stemHeight = this.getRandom(2, 4),
-            stemRadiusSegments = this.getRandom(5, 10);
+            stemHeight = Tools.getRandom(2, 4),
+            stemRadiusSegments = Tools.getRandom(5, 10);
 
         let stem = new THREE.CylinderGeometry (stemRadius, stemRadius, stemHeight, stemRadiusSegments);
         let stemMaterial = new THREE.MeshPhongMaterial(
@@ -365,9 +356,9 @@ export default class App {
         /**
           Cap
           */
-        let capRadius = this.getRandom(2, 3),
-            widthSegments = this.getRandom(5, 10),
-            heightSegments = this.getRandom(5, 10),
+        let capRadius = Tools.getRandom(2, 3),
+            widthSegments = Tools.getRandom(5, 10),
+            heightSegments = Tools.getRandom(5, 10),
             capPhiStart = 0,
             capPhiLength = Math.PI;
 
@@ -395,35 +386,79 @@ export default class App {
       */
 
     analyseSound() {
-
       // Get amplitude
       var frequencies = this.audio.getSpectrum();
       var backgroundColor = [0x064459, 0x395658];
+      var angle = .1;
+      // console.log(this.angle);
+
+      // Retrieve all frequencies
+      // Diviser le tab de fréquences par le nb d'arbres
+      // Pour chaque arbre, récupérer la zone de fréquences
+      // Jump en fonction de la fréquence
+
+      if (this.angle >= Math.PI * 2) {
+        this.move = 'down';
+      } else if (this.angle < 0) {
+        this.move = 'up';
+      }
+
+      if (this.move === 'down') {
+        // console.log('down');
+        this.angle -= angle;
+      } else if (this.move === 'up') {
+        // console.log('up');
+        this.angle += angle;
+      }
 
       for(var i = 0, c = frequencies.length; i < c; i++) {
-        var frequencyMax = 230;
+        var frequencyMax1 = 230;
+        var frequencyMax2 = 280;
 
-        if (frequencies[i] >= frequencyMax ) {
+        if (frequencies[i] >= frequencyMax1 ) {
 
           // Move cones
-          for (let i = 0, c = this.cones.length; i < c ; i++) {
-            for (let j = 0, c = this.cones[i].length; j < c; j++) {
+          for (let i = 0, c = this.trees.length; i < c ; i++) {
+            // for (let j = 0, c = this.trees[i].length; j < c; j++) {
               // console.log(this.cones[i][j]);
-              // Find a way to update the position x, z and y (easeOutBack)
-              let oldPosition = this.cones[i][j].rotation;
-              oldPosition.set(oldPosition.x, oldPosition.y + .15, oldPosition.z);
 
-            }
+              // Find a way to update the position x, z and y (easeOutBack)
+              // let oldConeRotation = this.cones[i][j].rotation;
+              // oldConeRotation.set(oldConeRotation.x, oldConeRotation.y + .15, oldConeRotation.z);
+              //
+              // let oldConePosition = this.cones[i][j].position;
+              // oldConePosition.x = oldConePosition.x + Math.cos(this.angle);
+              // Angle variation left and right
+
+            // }
+
+            // Move Trunk
+            // console.log(i, this.trees[i])
+            // let oldTreePosition = this.trees[i].position;
+            // oldTreePosition.x = oldTreePosition.x + Math.cos(this.angle);
+
+            // if (this.angle >= Math.PI * 2) {
+            //   this.angle = (Math.PI * 2) - this.angle;
+            //   console.log('positif');
+            // } else if (this.angle <= 0) {
+            //   this.angle = 0 + this.angle;
+            //   console.log('negatif');
+            // }
           }
 
           // Change background color
-          var randomColor = backgroundColor[this.getRandom(0, backgroundColor.length)];
+          var randomColor = backgroundColor[Tools.getRandom(0, backgroundColor.length)];
           this.scene.background = new THREE.Color( randomColor );
-          this.scene.fog = new THREE.FogExp2 (randomColor, 0.01);
+          if (!this.debug)this.scene.fog = new THREE.FogExp2 (randomColor, 0.01);
 
           // Create firefly
 
         }
+
+        // if (frequencies[i] >= frequencyMax2) {
+        //   this.scene.background = new THREE.Color( 0xeeeeee );
+        //   this.scene.fog = new THREE.FogExp2 (0xeeeeee, 0.01);
+        // }
 
       }
     }
@@ -470,7 +505,4 @@ export default class App {
     	this.renderer.setSize( window.innerWidth, window.innerHeight );
     }
 
-    getRandom(min, max) {
-      return Math.floor(Math.random() * (max - min) + min);
-    }
 }

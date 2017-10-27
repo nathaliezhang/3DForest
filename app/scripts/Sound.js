@@ -136,7 +136,7 @@ export default class Sound {
 
     get duration() {
 
-        return this._isLoaded ? this._buffer.duration : 0;
+        return this._isLoaded ? this._buffer.duration : 0; //buffer.duration : durée musique
     }
 
     get time() {
