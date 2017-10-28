@@ -79,23 +79,13 @@ export default class Tree extends THREE.Group {
 
     this.swingCurrent = 1;
 
+    //TweenLite.to( this.position, .5, {y: Math.PI * 2, ease: Expo.easeOut} )
+
   }
 
   update() {
 
     // If it doesn't kick therefore current = 0
-
-    // if (this.swingCurrent > 0) { this.swingCurrent -= .01; }
-    // this.rotation.z = this.swingCurrent * Math.PI / 12; // If swingCurrent = 0 alors rotation.z = 0
-
-    // if (this.swingCurrent > 0) {
-    //   this.swingCurrent -= .005;
-    //   this.rotation.z = this.swingCurrent * Math.PI / 24;
-    //   console.log('position');
-    // } else if (this.swingCurrent > - 1 && this.swingCurrent < 0) {
-    //   this.rotation.z = this.swingCurrent * Math.PI / 24;
-    //   console.log('negatif');
-    // }
 
     if (this.swingCurrent > -1 && this.swingCurrent < 0) {
       // console.log("Hey");

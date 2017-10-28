@@ -12,6 +12,7 @@ import Tree from './Tree';
 import Mushroom from './Mushroom';
 import Stone from './Stone';
 import Music from '../assets/sound/Sublustris Nox - Lost In the Woods.mp3';
+import TweenLite from 'gsap';
 
 export default class App {
 
@@ -61,7 +62,7 @@ export default class App {
           }
         }
       });
-      kickSwing.on();
+      // kickSwing.on();
 
       let kickJump = this.audio.createKick({
         frequency: [60, 70],
@@ -253,7 +254,7 @@ export default class App {
 
     createTrees(positions) {
 
-      var nbTrees = 16;
+      var nbTrees = 32;
 
       for (let i = 0; i < nbTrees; i++) {
 
@@ -329,9 +330,9 @@ export default class App {
       var spectrumEnd = spectrumLength;
       var treeSpectrum = [];
 
-      for(let i = 0, c = frequencies.length; i < c; i++) {
+      for (let i = 0, c = frequencies.length; i < c; i++) {
 
-        if(i === spectrumEnd) {
+        if (i === spectrumEnd) {
           treeSpectrum.push( frequencies.slice( spectrumStart, spectrumEnd ) );
           spectrumStart = spectrumEnd;
           spectrumEnd += spectrumLength;
@@ -340,18 +341,26 @@ export default class App {
       }
       //console.log(treeSpectrum);
 
-      // Jump en fonction de la moyenne de l'amplitude des fréquences
+      // Get the average amplitudes for each spectrum
+      var averages = [];
+
       for (let i = 0, c = treeSpectrum.length; i < c; i++) {
-        // console.log(treeSpectrum[i].length);
+        var sum = 0;
+
         for (let j = 0, c = treeSpectrum[i].length; j < c; j++) {
-          // console.log(treeSpectrum[i][j]);
-          var sum = 0;
-          sum += treeSpectrum[i][j]; // Revoir le calcul de la somme
+          sum += treeSpectrum[i][j];
           //console.log('Somme : ' + sum);
         }
-        var average = 0;
-        average = sum / treeSpectrum[i].length;
-        //console.log('Moyenne : ' + average);
+
+        var avarage = sum / treeSpectrum[i].length;
+        //console.log('Moyenne : ' + avarage);
+
+        var defaultPositionY = this.trees[i].position.y;
+
+        // Jump based on the average
+        TweenLite.to( this.trees[i].position, .4, {y: avarage * .4, ease: Expo.easeOut} );
+        averages.push(avarage);
+
       }
 
       var backgroundColor = [0x064459, 0x395658];
