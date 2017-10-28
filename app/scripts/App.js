@@ -253,7 +253,7 @@ export default class App {
 
     createTrees(positions) {
 
-      var nbTrees = 10;
+      var nbTrees = 16;
 
       for (let i = 0; i < nbTrees; i++) {
 
@@ -319,16 +319,42 @@ export default class App {
       */
 
     analyseSound() {
-      // Get amplitude
+
+      // Retrieve all frequencies for each frame (amplitudes)
       var frequencies = this.audio.getSpectrum();
+
+      // Retrieve a spectrum for each TREE
+      var spectrumStart = 0;
+      var spectrumLength = Math.round(frequencies.length / this.trees.length); // 16
+      var spectrumEnd = spectrumLength;
+      var treeSpectrum = [];
+
+      for(let i = 0, c = frequencies.length; i < c; i++) {
+
+        if(i === spectrumEnd) {
+          treeSpectrum.push( frequencies.slice( spectrumStart, spectrumEnd ) );
+          spectrumStart = spectrumEnd;
+          spectrumEnd += spectrumLength;
+        }
+
+      }
+      //console.log(treeSpectrum);
+
+      // Jump en fonction de la moyenne de l'amplitude des fréquences
+      for (let i = 0, c = treeSpectrum.length; i < c; i++) {
+        // console.log(treeSpectrum[i].length);
+        for (let j = 0, c = treeSpectrum[i].length; j < c; j++) {
+          // console.log(treeSpectrum[i][j]);
+          var sum = 0;
+          sum += treeSpectrum[i][j]; // Revoir le calcul de la somme
+          //console.log('Somme : ' + sum);
+        }
+        var average = 0;
+        average = sum / treeSpectrum[i].length;
+        //console.log('Moyenne : ' + average);
+      }
+
       var backgroundColor = [0x064459, 0x395658];
-
-      // Retrieve all frequencies
-      // Diviser le tab de fréquences par le nb d'arbres
-      // Pour chaque arbre, récupérer la zone de fréquences
-      // Jump en fonction de la fréquence
-
-
       for(var i = 0, c = frequencies.length; i < c; i++) {
         var frequencyMax1 = 230;
         var frequencyMax2 = 280;
