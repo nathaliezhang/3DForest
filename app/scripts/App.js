@@ -27,7 +27,7 @@ export default class App {
         Camera
         */
       this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 550 );
-      this.camera.position.y = 40;
+      this.camera.position.y = 45;
       this.camera.position.z = 180;
 
     	this.scene = new THREE.Scene();
@@ -254,7 +254,7 @@ export default class App {
 
     createTrees(positions) {
 
-      var nbTrees = 32;
+      var nbTrees = 160;
 
       for (let i = 0; i < nbTrees; i++) {
 
@@ -316,10 +316,10 @@ export default class App {
     }
 
     /**
-      Analyse the sound
+      Animations
       */
 
-    analyseSound() {
+    treesAnimation() {
 
       // Retrieve all frequencies for each frame (amplitudes)
       var frequencies = this.audio.getSpectrum();
@@ -339,82 +339,46 @@ export default class App {
         }
 
       }
-      //console.log(treeSpectrum);
 
       // Get the average amplitudes for each spectrum
-      var averages = [];
-
       for (let i = 0, c = treeSpectrum.length; i < c; i++) {
-        var sum = 0;
 
+        var sum = 0;
         for (let j = 0, c = treeSpectrum[i].length; j < c; j++) {
           sum += treeSpectrum[i][j];
-          //console.log('Somme : ' + sum);
         }
-
         var avarage = sum / treeSpectrum[i].length;
-        //console.log('Moyenne : ' + avarage);
-
-        var defaultPositionY = this.trees[i].position.y;
 
         // Jump based on the average
-        TweenLite.to( this.trees[i].position, .4, {y: avarage * .4, ease: Expo.easeOut} );
-        averages.push(avarage);
+        var defaultPositionY = this.trees[i].defaultPositionY;
+        TweenLite.to( this.trees[i].position, .2, {y: defaultPositionY + avarage * .3, ease: Expo.easeOut} );
 
       }
+    }
 
+    backgroundAnimation() {
+
+      var frequencies = this.audio.getSpectrum();
       var backgroundColor = [0x064459, 0x395658];
+
       for(var i = 0, c = frequencies.length; i < c; i++) {
-        var frequencyMax1 = 230;
-        var frequencyMax2 = 280;
+
+        var frequencyMax = 230;
         // console.log(frequencies[i]);
 
-        if (frequencies[i] >= frequencyMax1 ) {
-
-          // Move cones
-          for (let i = 0, c = this.trees.length; i < c ; i++) {
-            // for (let j = 0, c = this.trees[i].length; j < c; j++) {
-              // console.log(this.cones[i][j]);
-
-              // Find a way to update the position x, z and y (easeOutBack)
-              // let oldConeRotation = this.cones[i][j].rotation;
-              // oldConeRotation.set(oldConeRotation.x, oldConeRotation.y + .15, oldConeRotation.z);
-              //
-              // let oldConePosition = this.cones[i][j].position;
-              // oldConePosition.x = oldConePosition.x + Math.cos(this.angle);
-              // Angle variation left and right
-
-            // }
-
-            // Move Trunk
-            // console.log(i, this.trees[i])
-            // let oldTreePosition = this.trees[i].position;
-            // oldTreePosition.x = oldTreePosition.x + Math.cos(this.angle);
-
-            // if (this.angle >= Math.PI * 2) {
-            //   this.angle = (Math.PI * 2) - this.angle;
-            //   console.log('positif');
-            // } else if (this.angle <= 0) {
-            //   this.angle = 0 + this.angle;
-            //   console.log('negatif');
-            // }
-          }
+        if (frequencies[i] >= frequencyMax ) {
 
           // Change background color
           var randomColor = backgroundColor[Tools.getRandom(0, backgroundColor.length)];
           this.scene.background = new THREE.Color( randomColor );
-          if (!this.debug)this.scene.fog = new THREE.FogExp2 (randomColor, 0.01);
+          if (!this.debug) this.scene.fog = new THREE.FogExp2 (randomColor, 0.01);
 
           // Create firefly
 
         }
 
-        // if (frequencies[i] >= frequencyMax2) {
-        //   this.scene.background = new THREE.Color( 0xeeeeee );
-        //   this.scene.fog = new THREE.FogExp2 (0xeeeeee, 0.01);
-        // }
-
       }
+
     }
 
     /**
@@ -444,10 +408,9 @@ export default class App {
     }
 
     render() {
-      this.analyseSound();
-
-        // this.mesh.rotation.x += 0.01;
-        // this.mesh.rotation.y += 0.02;
+      
+      this.treesAnimation();
+      this.backgroundAnimation();
 
     	this.renderer.render( this.scene, this.camera );
     }
