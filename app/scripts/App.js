@@ -9,6 +9,8 @@ import OrbitControls from 'three/examples/js/controls/OrbitControls';
 import PlainTexture from '../assets/textures/plain.jpg';
 import Sound from './Sound';
 import Tree from './Tree';
+import Mushroom from './Mushroom';
+import Stone from './Stone';
 import Music from '../assets/sound/Sublustris Nox - Lost In the Woods.mp3';
 
 export default class App {
@@ -36,7 +38,7 @@ export default class App {
       this.audio = new Sound( Music, 100, 0, function() {
         // console.log(this);
         this.audio.play();
-      }.bind(this), true );
+      }.bind(this), false );
 
       /**
         Kick
@@ -109,7 +111,7 @@ export default class App {
       this.meshPlane.rotation.x = - Math.PI / 2;
       this.scene.add( this.meshPlane );
 
-      this.treesPosition();
+      this.elementsPosition();
 
       /**
         Fog
@@ -134,8 +136,6 @@ export default class App {
 
       /** Cone*/
       this.trees = [];
-      this.angle = 0;
-      this.move = 'up';
 
       /**
         Debug controls : after camera and renderer
@@ -152,9 +152,9 @@ export default class App {
     }
 
     /**
-      Retrieve trees positions with the plane coordinates
+      Retrieve elements position with the plane coordinates
       */
-    treesPosition() {
+    elementsPosition() {
 
       // Load the image
       this.texture = new Image();
@@ -248,34 +248,30 @@ export default class App {
     }
 
     /**
-      TREES : place elements according to the positions calculate previously
+      TREES : Place the elements according to the positions calculate previously
       */
 
     createTrees(positions) {
 
-      var nbTrees = 250;
+      var nbTrees = 10;
 
       for (let i = 0; i < nbTrees; i++) {
 
         // let tree = new THREE.Group();
         // this.scene.add(tree);
 
-        // Get a random position in the Plane
+        // Get a random position in the Plane and retrieve the coordinates
         let position = positions[Tools.getRandom(0, positions.length)];
 
-        // Retrieve the position
-        let tree = new Tree(position);
-
-        tree.defaultPositionY = position.z;
-        // console.log(tree.defaultPositionY);
-
+        let tree = new Tree();
+        tree.defaultPositionY = position.z; // Pass the position Z
         tree.position.set(position.x, position.z, position.y);
+
         this.scene.add(tree);
         this.trees.push(tree);
-        // console.log(this.cones);
       }
 
-    } // End createTrees
+    }
 
     /**
       STONES
@@ -283,34 +279,17 @@ export default class App {
 
     createStones(positions) {
 
-      var nbStones = 120;
+      var nbStones = 10;
 
       for (let i = 0; i < nbStones; i++) {
 
         // Get a random position in the Plane
-        let position = positions[Tools.getRandom(0, positions.length)],
+        let position = positions[Tools.getRandom(0, positions.length)];
 
-            // Retrieve the position
-            stoneX = position.x,
-            stoneY = position.z,
-            stoneZ = position.y;
+        let stone = new Stone();
+        stone.position.set(position.x, position.z, position.y);
 
-        let stroneRadius = Tools.getRandom(1, 3);
-
-        let stone = new THREE.DodecahedronGeometry (stroneRadius);
-        let stoneMaterial = new THREE.MeshPhongMaterial(
-          {
-            color: 0x736b6b,
-            emissive: 0x524848,
-            specular: 0xa69f9f,
-            shininess: 5
-          }
-        );
-
-        this.stoneMesh = new THREE.Mesh (stone, stoneMaterial);
-        this.stoneMesh.position.set(stoneX, stoneY + stroneRadius, stoneZ);
-
-        this.scene.add( this.stoneMesh );
+        this.scene.add( stone );
       }
     }
 
@@ -320,63 +299,17 @@ export default class App {
 
     createMushrooms(positions) {
 
-      var nbMushrooms = 100;
+      var nbMushrooms = 10;
 
       for (var i = 0; i < nbMushrooms; i++) {
 
-        // Get a random position in the Plane
-        let position = positions[Tools.getRandom(0, positions.length)],
+        // Get a random position in the Plane and retrieve the coordinates
+        let position = positions[Tools.getRandom(0, positions.length)];
 
-            // Retrieve the position
-            mushroomX = position.x,
-            mushroomY = position.z,
-            mushroomZ = position.y;
+        let mushroom = new Mushroom();
+        mushroom.position.set(position.x, position.z, position.y);
 
-        /**
-          Steam
-          */
-
-        let stemRadius = .5,
-            stemHeight = Tools.getRandom(2, 4),
-            stemRadiusSegments = Tools.getRandom(5, 10);
-
-        let stem = new THREE.CylinderGeometry (stemRadius, stemRadius, stemHeight, stemRadiusSegments);
-        let stemMaterial = new THREE.MeshPhongMaterial(
-          {
-            color: 0xf0e4d7,
-            emissive: 0xdbd0c4,
-            specular: 0xfcfaf7,
-            shininess: 2
-          }
-        );
-
-        this.stemMesh = new THREE.Mesh (stem, stemMaterial);
-        this.stemMesh.position.set(mushroomX, mushroomY + stemHeight, mushroomZ);
-
-        /**
-          Cap
-          */
-        let capRadius = Tools.getRandom(2, 3),
-            widthSegments = Tools.getRandom(5, 10),
-            heightSegments = Tools.getRandom(5, 10),
-            capPhiStart = 0,
-            capPhiLength = Math.PI;
-
-        let cap = new THREE.SphereGeometry(capRadius, widthSegments, heightSegments, capPhiStart, capPhiLength)
-        let capMaterial = new THREE.MeshPhongMaterial(
-          {
-            color: 0xc2b8ac,
-            emissive: 0xaca397,
-            specular: 0xd7d0c6,
-            shininess: 2
-          }
-        );
-
-        this.capMesh = new THREE.Mesh (cap, capMaterial);
-        this.capMesh.rotation.x = -Math.PI / 2;
-        this.capMesh.position.set(mushroomX, mushroomY + stemHeight , mushroomZ);
-
-        this.scene.add( this.stemMesh, this.capMesh );
+        this.scene.add(mushroom);
       }
 
     }
@@ -389,32 +322,17 @@ export default class App {
       // Get amplitude
       var frequencies = this.audio.getSpectrum();
       var backgroundColor = [0x064459, 0x395658];
-      // var angle = .1;
-      // console.log(this.angle);
 
       // Retrieve all frequencies
       // Diviser le tab de fréquences par le nb d'arbres
       // Pour chaque arbre, récupérer la zone de fréquences
       // Jump en fonction de la fréquence
 
-      // if (this.angle >= Math.PI * 2) {
-      //   this.move = 'down';
-      // } else if (this.angle < 0) {
-      //   this.move = 'up';
-      // }
-      //
-      // if (this.move === 'down') {
-      //   // console.log('down');
-      //   this.angle -= angle;
-      // } else if (this.move === 'up') {
-      //   // console.log('up');
-      //   this.angle += angle;
-      // }
 
       for(var i = 0, c = frequencies.length; i < c; i++) {
         var frequencyMax1 = 230;
         var frequencyMax2 = 280;
-        console.log(frequencies[i]);
+        // console.log(frequencies[i]);
 
         if (frequencies[i] >= frequencyMax1 ) {
 

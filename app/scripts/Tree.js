@@ -4,19 +4,18 @@ import TweenLite from 'gsap';
 
 export default class Tree extends THREE.Group {
 
-  constructor(position) {
-    super();
+  constructor() {
+
+    super(); // Access properties and methods of the parent object (Object 3D like position, rotation...)
+
+    this.defaultPositionY = 0;
+
+    this.swingCurrent = -1;
+    this.jumpCurrent = 0;
 
     /**
       Trunk
       */
-
-    // this.position.set(position.x, position.z, position.y);
-    // this.defaultPositionY = position.z;
-
-    this.defaultPositionY = 0;
-    this.swingCurrent = -1;
-    this.jumpCurrent = 0;
 
     let trunkRadius = .75,
         trunkHeight = Tools.getRandom(4, 6),
@@ -33,9 +32,7 @@ export default class Tree extends THREE.Group {
 
     this.trunkTreeMesh = new THREE.Mesh (trunkTree, trunkTreeMaterial);
     this.trunkTreeMesh.position.set(0, 0 + trunkHeight, 0);
-    this.add( this.trunkTreeMesh );
-
-    // console.log(this.trunks);
+    this.add( this.trunkTreeMesh ); // Add the mesh to the group
 
     /**
       Cones
@@ -65,7 +62,7 @@ export default class Tree extends THREE.Group {
       this.coneTreeMesh = new THREE.Mesh (coneTree, coneTreeMaterial);
       this.coneTreeMesh.position.set(0, coneY, 0);
 
-      // new properties for each loop
+      // New properties for each loop
       cones[i] = this.coneTreeMesh;
       coneRadius = cones[i].geometry.parameters.radius - 1;
       coneHeight = cones[i].geometry.parameters.height - 2;
