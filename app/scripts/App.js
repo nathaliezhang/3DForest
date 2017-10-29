@@ -27,9 +27,9 @@ export default class App {
       /**
         Camera
         */
-      this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 550 );
+      this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 450 );
       this.camera.position.y = 50;
-      this.camera.position.z = 170;
+      this.camera.position.z = 100;
 
     	this.scene = new THREE.Scene();
 
@@ -84,10 +84,10 @@ export default class App {
           for (let i = 0, c = this.trees.length; i < c ; i++) {
             this.trees[i].jump();
           }
-          var backgroundColor = [0x2e4244, 0x395658];
-          var randomColor = backgroundColor[Tools.getRandom(0, backgroundColor.length)];
-          if (!this.debug) this.scene.background = new THREE.Color( randomColor );
-          if (!this.debug) this.scene.fog = new THREE.FogExp2 (randomColor, 0.012);
+          // var backgroundColor = [0x2e4244, 0x395658];
+          // var randomColor = backgroundColor[Tools.getRandom(0, backgroundColor.length)];
+          // if (!this.debug) this.scene.background = new THREE.Color( randomColor );
+          // if (!this.debug) this.scene.fog = new THREE.FogExp2 (randomColor, 0.012);
         },
         offKick: () => {
           for (let i = 0, c = this.trees.length; i < c ; i++) {
@@ -171,8 +171,8 @@ export default class App {
         Fog
         */
 
-      this.scene.background = new THREE.Color( 0xe9f8ff );
-      if (!this.debug) this.scene.fog = new THREE.FogExp2 (0xe9f8ff, 0.01);
+      this.scene.background = new THREE.Color( 0x2e4244 );
+      if (!this.debug) this.scene.fog = new THREE.FogExp2 (0x2e4244, 0.01);
 
       /**
         Light
@@ -311,7 +311,7 @@ export default class App {
 
     createTrees(positions) {
 
-      var nbTrees = 256;
+      var nbTrees = 160; // 256
 
       for (let i = 0; i < nbTrees; i++) {
 
@@ -337,7 +337,7 @@ export default class App {
 
     createStones(positions) {
 
-      var nbStones = 80;
+      var nbStones = 20; // 80
 
       for (let i = 0; i < nbStones; i++) {
 
@@ -357,7 +357,7 @@ export default class App {
 
     createMushrooms(positions) {
 
-      var nbMushrooms = 120;
+      var nbMushrooms = 40; // 110
 
       for (var i = 0; i < nbMushrooms; i++) {
 
@@ -381,7 +381,7 @@ export default class App {
     createFireflies() {
 
       let fireflies = new THREE.Geometry();
-      let nbFireflies = 500;
+      let nbFireflies = 300;
 
       for (let i = 0; i < nbFireflies; i++) {
 
@@ -449,7 +449,7 @@ export default class App {
         var treeDefaultY = this.trees[i].treeDefaultY;
 
         var target = this.trees[i].position;
-        TweenLite.to( target, .16, {y: treeDefaultY + avarage * .25, ease: Expo.easeInOut} );
+        TweenLite.to( target, .16, {y: treeDefaultY + avarage * .25, ease: Expo.easeInOut} ); // to do : optimise
 
       }
     }

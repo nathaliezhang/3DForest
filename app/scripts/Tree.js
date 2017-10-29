@@ -92,7 +92,7 @@ export default class Tree extends THREE.Group {
   update() {
 
     // If it doesn't kick therefore current = 0
-    if (this.currentJump > 0) { this.currentJump -= .2; }
+    if (this.currentJump > 0) { this.currentJump -= .1; }
 
     this.position.y = this.treeDefaultY + this.currentJump * 2;
 
