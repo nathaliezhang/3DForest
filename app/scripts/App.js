@@ -18,7 +18,7 @@ export default class App {
 
     constructor() {
 
-      this.debug = true;
+      this.debug = false;
 
       this.container = document.querySelector( '#main' );
     	document.body.appendChild( this.container );
@@ -28,7 +28,7 @@ export default class App {
         */
       this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 550 );
       this.camera.position.y = 50;
-      this.camera.position.z = 180;
+      this.camera.position.z = 160;
 
     	this.scene = new THREE.Scene();
 
@@ -37,9 +37,19 @@ export default class App {
         */
 
       this.audio = new Sound( Music, 100, 0, function() {
-        // console.log(this);
+
+        // Start
         this.audio.play();
-      }.bind(this), true );
+
+        var home = document.querySelector('#home');
+        home.style.opacity = '0';
+        // home.style.width = '0';
+        // home.style.height = '0';
+
+        var title = document.querySelector('.title');
+        title.style.display = 'block';
+
+      }.bind(this), false );
 
       /**
         KICKS
@@ -49,9 +59,9 @@ export default class App {
         Trees Jump
         */
 
-      let TreeJumpKick = this.audio.createKick({
-        frequency: [16, 20],
-        threshold: 130,
+      let firstTreeJumpKick = this.audio.createKick({
+        frequency: [12, 15],
+        threshold: 140,
         decay: 1,
         onKick: () => {
           for (let i = 0, c = this.trees.length; i < c ; i++) {
@@ -65,7 +75,29 @@ export default class App {
         }
       });
 
-      TreeJumpKick.on();
+      firstTreeJumpKick.on();
+
+      let secondTreeJumpKick = this.audio.createKick({
+        frequency: [16, 20],
+        threshold: 130,
+        decay: 1,
+        onKick: () => {
+          for (let i = 0, c = this.trees.length; i < c ; i++) {
+            this.trees[i].jump();
+          }
+          var backgroundColor = [0x2e4244, 0x395658];
+          var randomColor = backgroundColor[Tools.getRandom(0, backgroundColor.length)];
+          if (!this.debug) this.scene.background = new THREE.Color( randomColor );
+          if (!this.debug) this.scene.fog = new THREE.FogExp2 (randomColor, 0.012);
+        },
+        offKick: () => {
+          for (let i = 0, c = this.trees.length; i < c ; i++) {
+            this.trees[i].update();
+          }
+        }
+      });
+
+      secondTreeJumpKick.on();
 
       /**
         Mushrooms Rise
@@ -94,6 +126,12 @@ export default class App {
       mushroomRiseKick.off();
 
       /** SCENE **/
+
+      /**
+        Scene elements
+        */
+      this.trees = [];
+      this.mushrooms = [];
 
       /**
         Plain
@@ -146,16 +184,10 @@ export default class App {
     	this.container.appendChild( this.renderer.domElement );
 
       /**
-        Scene elements
-        */
-      this.trees = [];
-      this.mushrooms = [];
-
-      /**
         Debug controls : after camera and renderer
         */
       let controls;
-      controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
+      if (!this.debug) controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
 
       this.addEventListener();
 
@@ -270,7 +302,7 @@ export default class App {
 
     createTrees(positions) {
 
-      var nbTrees = 160;
+      var nbTrees = 256;
 
       for (let i = 0; i < nbTrees; i++) {
 
@@ -296,7 +328,7 @@ export default class App {
 
     createStones(positions) {
 
-      var nbStones = 10;
+      var nbStones = 50;
 
       for (let i = 0; i < nbStones; i++) {
 
@@ -316,7 +348,7 @@ export default class App {
 
     createMushrooms(positions) {
 
-      var nbMushrooms = 50;
+      var nbMushrooms = 120;
 
       for (var i = 0; i < nbMushrooms; i++) {
 
@@ -369,34 +401,11 @@ export default class App {
 
         // Jump based on the average
         var treeDefaultY = this.trees[i].treeDefaultY;
-        TweenLite.to( this.trees[i].position, .16, {y: treeDefaultY + avarage * .25, ease: Expo.easeInOut} );
+
+        var target = this.trees[i].position;
+        TweenLite.to( target, .16, {y: treeDefaultY + avarage * .25, ease: Expo.easeInOut} );
 
       }
-    }
-
-    backgroundAnimation() {
-
-      var frequencies = this.audio.getSpectrum();
-      var backgroundColor = [0x064459, 0x395658];
-
-      for(var i = 0, c = frequencies.length; i < c; i++) {
-
-        var frequencyMax = 230;
-        // console.log(frequencies[i]);
-
-        if (frequencies[i] >= frequencyMax ) {
-
-          // Change background color
-          var randomColor = backgroundColor[Tools.getRandom(0, backgroundColor.length)];
-          if (!this.debug) this.scene.background = new THREE.Color( randomColor );
-          if (!this.debug) this.scene.fog = new THREE.FogExp2 (randomColor, 0.01);
-
-          // Create firefly
-
-        }
-
-      }
-
     }
 
     /**
@@ -415,7 +424,6 @@ export default class App {
             this.audio.play();
           }
         }
-        // console.log(this.audio);
       }.bind(this));
 
     }
@@ -426,10 +434,10 @@ export default class App {
     }
 
     render() {
-      this.treesAnimation();
-      this.backgroundAnimation();
 
+      this.treesAnimation();
     	this.renderer.render( this.scene, this.camera );
+
     }
 
     onWindowResize() {

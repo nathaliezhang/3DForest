@@ -12,6 +12,23 @@ export default class Tree extends THREE.Group {
 
     this.currentJump = 0;
 
+    this.coneColor = [{
+      color: 0x2c714a,
+      emissive: 0x1a5e38,
+      specular: 0x75b490,
+      shininess: 10
+    }, {
+      color: 0x114732,
+      emissive: 0x0b3827,
+      specular: 0x2d7358,
+      shininess: 10
+    }, {
+      color: 0x307057,
+      emissive: 0x1f5741,
+      specular: 0x40876b,
+      shininess: 10
+    }];
+
     /**
       Trunk
       */
@@ -43,20 +60,15 @@ export default class Tree extends THREE.Group {
         coneRadius = Tools.getRandom(4, 8),
         coneHeight = Tools.getRandom(12, 18),
         coneRadialSegments = Tools.getRandom(5, 10), // 8, 20
-        coneY = 0 + trunkHeight + coneHeight / 2; // Position Y of the cone
+        coneY = 0 + trunkHeight + coneHeight / 2, // Position Y of the cone
+        coneColor = this.coneColor[Tools.getRandom(0, this.coneColor.length)];
 
     // Loop to create trees with multiples cones
+
     for (let i = 0; i < nbCones; i++) {
 
       let coneTree = new THREE.ConeGeometry (coneRadius, coneHeight, coneRadialSegments);
-      let coneTreeMaterial = new THREE.MeshPhongMaterial(
-        {
-          color: 0x2c714a,
-          emissive: 0x1a5e38,
-          specular: 0x75b490,
-          shininess: 10
-        }
-      );
+      let coneTreeMaterial = new THREE.MeshPhongMaterial(coneColor);
 
       this.coneTreeMesh = new THREE.Mesh (coneTree, coneTreeMaterial);
       this.coneTreeMesh.position.set(0, coneY, 0);
@@ -66,9 +78,6 @@ export default class Tree extends THREE.Group {
       coneRadius = cones[i].geometry.parameters.radius - 1;
       coneHeight = cones[i].geometry.parameters.height - 2;
       coneY += coneHeight / 2;
-
-      // this.cones.push(this.coneTreeMesh);
-      // console.log(this.cones);
 
       this.add( this.coneTreeMesh );
     }
@@ -83,10 +92,9 @@ export default class Tree extends THREE.Group {
   update() {
 
     // If it doesn't kick therefore current = 0
+    if (this.currentJump > 0) { this.currentJump -= .2; }
 
-    if (this.currentJump > 0) { this.currentJump -= .15; }
-    // console.log(this.position.y);
-    this.position.y = this.treeDefaultY + this.currentJump * 6;
+    this.position.y = this.treeDefaultY + this.currentJump * 2;
 
   }
 
