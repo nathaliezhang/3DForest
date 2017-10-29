@@ -27,7 +27,7 @@ export default class App {
         Camera
         */
       this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 550 );
-      this.camera.position.y = 45;
+      this.camera.position.y = 50;
       this.camera.position.z = 180;
 
     	this.scene = new THREE.Scene();
@@ -39,34 +39,19 @@ export default class App {
       this.audio = new Sound( Music, 100, 0, function() {
         // console.log(this);
         this.audio.play();
-      }.bind(this), false );
+      }.bind(this), true );
 
       /**
-        Kick
+        KICKS
         */
 
-      /** /!\ ADD A KICK FOR MUSHROOMS /!\ **/
+      /**
+        Trees Jump
+        */
 
-      let kickSwing = this.audio.createKick({
-        frequency: [15, 20],
-        threshold: 150, // seuil
-        decay: 1,
-        onKick: () => {
-          for (let i = 0, c = this.trees.length; i < c ; i++) {
-            this.trees[i].swing();
-          }
-        },
-        offKick: () => {
-          for (let i = 0, c = this.trees.length; i < c ; i++) {
-            this.trees[i].update();
-          }
-        }
-      });
-      // kickSwing.on();
-
-      let kickJump = this.audio.createKick({
-        frequency: [60, 70],
-        threshold: 120,
+      let TreeJumpKick = this.audio.createKick({
+        frequency: [16, 20],
+        threshold: 130,
         decay: 1,
         onKick: () => {
           for (let i = 0, c = this.trees.length; i < c ; i++) {
@@ -79,9 +64,36 @@ export default class App {
           }
         }
       });
-      // kickJump.on();
 
-      this.addEventListener();
+      TreeJumpKick.on();
+
+      /**
+        Mushrooms Rise
+        */
+
+      let mushroomRiseKick = this.audio.createKick({
+        frequency: [45, 256],
+        threshold: 100,
+        decay: 1,
+        onKick: () => {
+          for (var i = 0, c = this.mushrooms.length; i < c; i++) {
+            this.mushrooms[i].rise();
+          }
+        },
+        offKick: () => {
+          for (var i = 0, c = this.mushrooms.length; i < c; i++) {
+            this.mushrooms[i].update();
+          }
+        }
+      });
+
+      this.audio.after('Mushrooms rise', 35, () => {
+        mushroomRiseKick.on();
+      });
+
+      mushroomRiseKick.off();
+
+      /** SCENE **/
 
       /**
         Plain
@@ -91,11 +103,9 @@ export default class App {
 
       let plain = new THREE.PlaneGeometry(this.planeWidth, this.planeHeight, 150, 150);
       // console.log(plain.vertices);
+
       let plainTextureLoader = new THREE.TextureLoader();
       let plainTexture = plainTextureLoader.load(PlainTexture);
-
-      plainTexture.wrapS = THREE.RepeatWrapping;
-      plainTexture.wrapT = THREE.RepeatWrapping;
 
       let plainMaterial = new THREE.MeshPhongMaterial(
         {
@@ -135,14 +145,19 @@ export default class App {
     	this.renderer.setSize( window.innerWidth, window.innerHeight );
     	this.container.appendChild( this.renderer.domElement );
 
-      /** Cone*/
+      /**
+        Scene elements
+        */
       this.trees = [];
+      this.mushrooms = [];
 
       /**
         Debug controls : after camera and renderer
         */
       let controls;
       controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
+
+      this.addEventListener();
 
     	window.addEventListener('resize', this.onWindowResize.bind(this), false);
       this.onWindowResize();
@@ -202,6 +217,7 @@ export default class App {
       }
 
       // Convert canvas x, y positions to Plane positions
+
       // First loop for coordinate y & second for x : from left to right, from top to bottom
       for (let i = 0, c = canvas.height; i < c; i++) { // i < 256
         for (let j = 0, c = canvas.width; j < c; j++) { // i < 256
@@ -265,7 +281,7 @@ export default class App {
         let position = positions[Tools.getRandom(0, positions.length)];
 
         let tree = new Tree();
-        tree.defaultPositionY = position.z; // Pass the position Z
+        tree.treeDefaultY = position.z; // Pass the position Z
         tree.position.set(position.x, position.z, position.y);
 
         this.scene.add(tree);
@@ -284,7 +300,7 @@ export default class App {
 
       for (let i = 0; i < nbStones; i++) {
 
-        // Get a random position in the Plane
+        // Get a random position in the Plane and retrieve the coordinates
         let position = positions[Tools.getRandom(0, positions.length)];
 
         let stone = new Stone();
@@ -300,7 +316,7 @@ export default class App {
 
     createMushrooms(positions) {
 
-      var nbMushrooms = 10;
+      var nbMushrooms = 50;
 
       for (var i = 0; i < nbMushrooms; i++) {
 
@@ -308,9 +324,11 @@ export default class App {
         let position = positions[Tools.getRandom(0, positions.length)];
 
         let mushroom = new Mushroom();
+        mushroom.mushroomDefaultY = position.z;
         mushroom.position.set(position.x, position.z, position.y);
 
-        this.scene.add(mushroom);
+        this.scene.add( mushroom );
+        this.mushrooms.push( mushroom );
       }
 
     }
@@ -350,8 +368,8 @@ export default class App {
         var avarage = sum / treeSpectrum[i].length;
 
         // Jump based on the average
-        var defaultPositionY = this.trees[i].defaultPositionY;
-        TweenLite.to( this.trees[i].position, .2, {y: defaultPositionY + avarage * .3, ease: Expo.easeOut} );
+        var treeDefaultY = this.trees[i].treeDefaultY;
+        TweenLite.to( this.trees[i].position, .16, {y: treeDefaultY + avarage * .25, ease: Expo.easeInOut} );
 
       }
     }
@@ -370,7 +388,7 @@ export default class App {
 
           // Change background color
           var randomColor = backgroundColor[Tools.getRandom(0, backgroundColor.length)];
-          this.scene.background = new THREE.Color( randomColor );
+          if (!this.debug) this.scene.background = new THREE.Color( randomColor );
           if (!this.debug) this.scene.fog = new THREE.FogExp2 (randomColor, 0.01);
 
           // Create firefly
@@ -408,7 +426,6 @@ export default class App {
     }
 
     render() {
-      
       this.treesAnimation();
       this.backgroundAnimation();
 

@@ -8,10 +8,9 @@ export default class Tree extends THREE.Group {
 
     super(); // Access properties and methods of the parent object (Object 3D like position, rotation...)
 
-    this.defaultPositionY = 0;
+    this.treeDefaultY = 0;
 
-    this.swingCurrent = -1;
-    this.jumpCurrent = 0;
+    this.currentJump = 0;
 
     /**
       Trunk
@@ -75,11 +74,9 @@ export default class Tree extends THREE.Group {
     }
   }
 
-  swing() {
+  jump() {
 
-    this.swingCurrent = 1;
-
-    //TweenLite.to( this.position, .5, {y: Math.PI * 2, ease: Expo.easeOut} )
+    this.currentJump = 1;
 
   }
 
@@ -87,25 +84,9 @@ export default class Tree extends THREE.Group {
 
     // If it doesn't kick therefore current = 0
 
-    if (this.swingCurrent > -1 && this.swingCurrent < 0) {
-      // console.log("Hey");
-      this.swingCurrent += .01;
-      this.rotation.z = this.swingCurrent * Math.PI / 24;
-
-    } else if (this.swingCurrent > 0){
-      this.swingCurrent -= .01;
-      this.rotation.z = this.swingCurrent * Math.PI / 24;
-    }
-
-    if (this.jumpCurrent > 0) { this.jumpCurrent -= .1; }
+    if (this.currentJump > 0) { this.currentJump -= .15; }
     // console.log(this.position.y);
-    this.position.y = this.defaultPositionY + this.jumpCurrent * 2;
-
-  }
-
-  jump() {
-
-    this.jumpCurrent = 1;
+    this.position.y = this.treeDefaultY + this.currentJump * 6;
 
   }
 

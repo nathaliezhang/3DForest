@@ -6,6 +6,9 @@ export default class Mushroom extends THREE.Group {
 
     super();
 
+    this.currentRise = 0;
+    this.mushroomDefaultY = 0;
+
     /**
       Steam
       */
@@ -49,8 +52,21 @@ export default class Mushroom extends THREE.Group {
 
     this.capMesh = new THREE.Mesh (cap, capMaterial);
     this.capMesh.rotation.x = -Math.PI / 2;
-    this.capMesh.position.set(0, 0 + stemHeight , 0);
+    this.capMesh.position.set(0, 0 + stemHeight + capRadius / 2, 0);
     this.add( this.capMesh );
+  }
+
+  rise() {
+
+    this.currentRise = 1;
+
+  }
+
+  update() {
+
+    if ( this.currentRise > 0 ) this.currentRise -= .1;
+    this.position.y = this.mushroomDefaultY + this.currentRise * 4;
+
   }
 
 }
