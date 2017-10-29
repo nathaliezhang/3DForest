@@ -11,6 +11,7 @@ import Sound from './Sound';
 import Tree from './Tree';
 import Mushroom from './Mushroom';
 import Stone from './Stone';
+import Firefly from '../assets/textures/firefly.png';
 import Music from '../assets/sound/Sublustris Nox - Lost In the Woods.mp3';
 import TweenLite from 'gsap';
 
@@ -28,7 +29,7 @@ export default class App {
         */
       this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 550 );
       this.camera.position.y = 50;
-      this.camera.position.z = 160;
+      this.camera.position.z = 170;
 
     	this.scene = new THREE.Scene();
 
@@ -43,8 +44,6 @@ export default class App {
 
         var home = document.querySelector('#home');
         home.style.opacity = '0';
-        // home.style.width = '0';
-        // home.style.height = '0';
 
         var title = document.querySelector('.title');
         title.style.display = 'block';
@@ -127,15 +126,21 @@ export default class App {
 
       /** SCENE **/
 
+      this.audio.between('Turn around', 0, 55, () => {
+        this.scene.rotation.y += .005;
+      });
+
       /**
         Scene elements
         */
       this.trees = [];
       this.mushrooms = [];
+      this.firefliesField = 0;
 
       /**
         Plain
         */
+
       this.planeWidth = 300;
       this.planeHeight = 300;
 
@@ -165,18 +170,20 @@ export default class App {
       /**
         Fog
         */
+
       this.scene.background = new THREE.Color( 0xe9f8ff );
       if (!this.debug) this.scene.fog = new THREE.FogExp2 (0xe9f8ff, 0.01);
 
       /**
         Light
         */
+
       let pointLight = new THREE.DirectionalLight( 0xffffff, 0.4);
       pointLight.position.set(30, 60, 60);
       this.scene.add( pointLight );
 
       let pointLightHelper = new THREE.PointLightHelper( pointLight, .5 );
-      this.scene.add( pointLightHelper );
+      if (this.debug) this.scene.add( pointLightHelper );
 
     	this.renderer = new THREE.WebGLRenderer( { antialias: true } );
     	this.renderer.setPixelRatio( window.devicePixelRatio );
@@ -186,8 +193,9 @@ export default class App {
       /**
         Debug controls : after camera and renderer
         */
+
       let controls;
-      if (!this.debug) controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
+      if (this.debug) controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
 
       this.addEventListener();
 
@@ -293,6 +301,7 @@ export default class App {
       this.createTrees(positions);
       this.createStones(positions);
       this.createMushrooms(positions);
+      this.createFireflies();
 
     }
 
@@ -328,7 +337,7 @@ export default class App {
 
     createStones(positions) {
 
-      var nbStones = 50;
+      var nbStones = 80;
 
       for (let i = 0; i < nbStones; i++) {
 
@@ -362,6 +371,43 @@ export default class App {
         this.scene.add( mushroom );
         this.mushrooms.push( mushroom );
       }
+
+    }
+
+    /**
+      FIREFLIES
+      */
+
+    createFireflies() {
+
+      let fireflies = new THREE.Geometry();
+      let nbFireflies = 500;
+
+      for (let i = 0; i < nbFireflies; i++) {
+
+        let firefly = new THREE.Vector3();
+        firefly.x = THREE.Math.randFloatSpread(500);
+        firefly.y = THREE.Math.randFloatSpread(500);
+        firefly.z = THREE.Math.randFloatSpread(500);
+        fireflies.vertices.push( firefly );
+
+      }
+
+      let fireflyTextureLoader = new THREE.TextureLoader();
+      let fireflyTexture = fireflyTextureLoader.load(Firefly);
+
+      let firefliesMaterial = new THREE.PointsMaterial({
+        color: 0xe8f19d,
+        map: fireflyTexture,
+        blending: THREE.AdditiveBlending,
+        transparent: true
+      });
+
+      let firefliesField = new THREE.Points(fireflies, firefliesMaterial);
+      this.scene.add( firefliesField );
+      this.firefliesField = firefliesField;
+
+      firefliesField.sortParticles = true;
 
     }
 
@@ -408,6 +454,14 @@ export default class App {
       }
     }
 
+    firefliesAnimation() {
+
+      if (this.firefliesField.rotation) {
+        this.firefliesField.rotation.y += .01;
+      }
+
+    }
+
     /**
       addEventListener
       */
@@ -436,6 +490,7 @@ export default class App {
     render() {
 
       this.treesAnimation();
+      this.firefliesAnimation();
     	this.renderer.render( this.scene, this.camera );
 
     }

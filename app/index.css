@@ -53,3 +53,9 @@ h1 {
   font-size: 12px;
   display: none;
 }
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 18px;
+  }
+}

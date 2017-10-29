@@ -34,6 +34,7 @@ export default class Mushroom extends THREE.Group {
     /**
       Cap
       */
+      
     let capRadius = Tools.getRandom(2, 3),
         widthSegments = Tools.getRandom(5, 10),
         heightSegments = Tools.getRandom(5, 10),
@@ -65,6 +66,7 @@ export default class Mushroom extends THREE.Group {
   update() {
 
     if ( this.currentRise > 0 ) this.currentRise -= .1;
+
     this.position.y = this.mushroomDefaultY + this.currentRise * 4;
 
   }
